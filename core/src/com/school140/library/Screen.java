@@ -295,7 +295,7 @@ if(noError){
         }
       //  allBookList.setItems(newItems);
 
-
+//
 tableListAllBook.setPosition((float) (-0.5*Gdx.graphics.getWidth()+3*allBookList.getWidth()/2),(float)
         (+0.5*Gdx.graphics.getHeight()-allBookList.getHeight()/2-2*newBook.getHeight()-20));
 
