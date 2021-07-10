@@ -293,7 +293,7 @@ if(noError){
         for (int i = 0; i < bookArrayList.size(); i++) {
             newItems.add(bookArrayList.get(i).name);
         }
-        allBookList.setItems(newItems);
+      //  allBookList.setItems(newItems);
 
 
 tableListAllBook.setPosition((float) (-0.5*Gdx.graphics.getWidth()+3*allBookList.getWidth()/2),(float)
