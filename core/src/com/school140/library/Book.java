@@ -8,7 +8,7 @@ import java.util.GregorianCalendar;
 public class Book {
     String name;
     String author;
-    int number;
+   static int number;
     int numberMein;
 Texture coverBook;
 String genre;

@@ -1,7 +1,6 @@
 package com.school140.library;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,20 +8,23 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Screen {
     static Texture errorStar=new Texture(Gdx.files.internal("error.jpg"));
 static     ArrayList<Integer> errorCord=new ArrayList<>();
     static Stage stage;
-
-    PagedScrollPane allBookList;
-    Table table = new Table();
+ScrollPane allBookScrollPane;
+    List allBookList;
+    static int index = -1;
+    Table mainMenuTable = new Table();
+    static Table numberAllBookTable = new Table();
+    static TextField numberAllBook;
+    static Table infoMenuTable = new Table();
+    Table allBookScrollPaneTable = new Table();
     Table tableListAllBook = new Table();
     Table newBookTable = new Table();
     Table addNewBookTable = new Table();
@@ -30,9 +32,10 @@ static     ArrayList<Integer> errorCord=new ArrayList<>();
     Table giveMenuTable = new Table();
     Table returnMenuTable = new Table();
 Table descriptionTable =new Table();
-
+    TextButton newBookAdded;
     TextButton newBook;
     TextButton newReader;
+    boolean noNullPointerException = true;
     SelectBox sort;
 boolean noError=true;
     TextButton giveBook;
@@ -44,6 +47,23 @@ boolean noError=true;
     TextButton readers;
 static Label error;
     static TextField nameBook;
+    static int infoMenuTip=1;
+    //1=book info
+    static TextField authorWindow;
+    static TextField nameBookWindow;
+    static TextField numberWindow;
+    static TextField ISBNWindow;
+    static Texture imageWindow;
+    static TextField genreWindow;
+    static TextField descriptionWindow;
+
+
+    static Window authorWindowPreName;
+    static Window nameBookWindowPreName;
+    static Window numberWindowPreName;
+    static Window genreWindowPreName;
+    static Window descriptionWindowPreName;
+
     TextField author;
     TextField number;
     TextField ISBN;
@@ -69,16 +89,87 @@ TextButton bookAdded;
         newReaderMenu();
         giveBookMenu();
         returnBookMenu();
+        infoMenu();
 
-        stage.addActor(table);
+        stage.addActor(mainMenuTable);
+
+    }
+
+    public static void imgRender(SpriteBatch batch) {
+
+        if(infoMenuTip==1){
+
+                batch.draw(imageWindow,Gdx.graphics.getWidth()/5*3,Gdx.graphics.getHeight()/2,
+                        (Gdx.graphics.getHeight()/2.0f-100.0f)/imageWindow.getHeight()*imageWindow.getWidth(),Gdx.graphics.getHeight()/2-100.0f);
+
+            }
+
+    }
+
+    private void infoMenu() {
+
+        authorWindowPreName=new Window("автор",skin);
+        numberWindowPreName=new Window("количество",skin);
+        genreWindowPreName=new Window("жанр",skin);
+        descriptionWindowPreName=new Window("оптисание",skin);
+        nameBookWindowPreName=new Window("название",skin);
+
+
+        infoMenuTable.setPosition(Gdx.graphics.getWidth()/4*3,Gdx.graphics.getHeight()/3);
+
+
+
+        authorWindow=new TextField("автор",skin);
+        authorWindow.setDisabled(true);
+        numberWindow=new TextField("0",skin);
+        numberWindow.setDisabled(true);
+                ISBNWindow=new TextField("ISBN",skin);
+        imageWindow =new Texture(Gdx.files.internal("noimg.png"));
+                genreWindow=new TextField("жанр",skin);
+                genreWindow.setDisabled(true);
+        descriptionWindow=new TextField("оптисание",skin);
+        descriptionWindow.setDisabled(true);
+        nameBookWindow=new TextField("название",skin);
+        nameBookWindow.setDisabled(true);
+        infoMenuTable.add(nameBookWindowPreName).fill(22,1).pad(2,0,2,75);
+        infoMenuTable.add(nameBookWindow).row();
+        infoMenuTable.add(authorWindowPreName).fill(22,1).pad(2,0,2,75);
+        infoMenuTable.add(authorWindow).row();
+        infoMenuTable.add(genreWindowPreName).fill(22,1).pad(2,0,2,75);
+        infoMenuTable.add(genreWindow).row();
+        infoMenuTable.add(numberWindowPreName).fill(22,1).pad(2,0,2,75);
+        infoMenuTable.add(numberWindow).row();
+        infoMenuTable.add(descriptionWindowPreName).fill(22,1).pad(2,0,2,75);
+        infoMenuTable.add(descriptionWindow).fill(true,true);
+
+stage.addActor(infoMenuTable);
 
     }
 
     private void allBookMenu() {
-        allBookList = new PagedScrollPane();
-        tableListAllBook.setFillParent(true);
-        tableListAllBook.setPosition(Gdx.graphics.getHeight()/-3, 0);
-        tableListAllBook.add(allBookList);
+        allBookList = new List(skin);
+        allBookScrollPaneTable.row();
+        allBookScrollPane = new ScrollPane(allBookScrollPaneTable);
+
+        allBookScrollPane.setScrollingDisabled(true,true);
+
+      noNullPointerException=true;
+      try {
+          tableListAllBook.add(allBookScrollPane)
+                  .size(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()-2*bookAdded.getHeight()-70);
+
+
+          tableListAllBook.setPosition(Gdx.graphics.getWidth()/4+10,Gdx.graphics.getHeight()/2);
+      }catch (NullPointerException e ){
+          noNullPointerException=false;
+      }
+        if (noNullPointerException){
+            tableListAllBook.add(allBookScrollPane)
+                    .size(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()-2*bookAdded.getHeight()-70);
+            tableListAllBook.setPosition(Gdx.graphics.getWidth()/4+10,Gdx.graphics.getHeight()/2-30);
+        }
+
+
 
 
        stage.addActor(tableListAllBook);
@@ -88,10 +179,47 @@ TextButton bookAdded;
 
 
     public static void render() {
+        numberAllBook.setText(String.valueOf(Book.number));
+        numberAllBookTable.setPosition(numberAllBook.getWidth()-60
+                ,numberAllBook.getHeight()+2);
+renderInfoMenu();
 
         stage.act();
 
         stage.draw();
+    }
+
+    private static void renderInfoMenu() {
+        if(infoMenuTip==1){
+            if(index==-1){
+
+            }else{
+                if (!bookArrayList.get(index).name.equals(nameBookWindow.getText())){
+
+                    authorWindow.setText(bookArrayList.get(index).author);
+                    numberWindow.setText(String.valueOf(bookArrayList.get(index).numberMein));
+                  //  ISBNWindow.setText(bookArrayList.get(index).);
+                    imageWindow =bookArrayList.get(index).coverBook;
+                    genreWindow.setText(bookArrayList.get(index).genre);
+                    descriptionWindow.setText(bookArrayList.get(index).description);
+                    nameBookWindow.setText(bookArrayList.get(index).name);
+
+
+                }
+
+
+            }
+
+
+
+
+
+
+
+
+        }
+
+
     }
 
     public static void errorRender(Batch batch) {
@@ -106,10 +234,15 @@ batch.draw(errorStar,(Gdx.graphics.getWidth()-error.getWidth())/3+20,((Gdx.graph
 
 
     public void meinMenu() {
-        table.setFillParent(true);
+        mainMenuTable.setFillParent(true);
         newBook = new TextButton("добавить книгу", skin);
-        table.setPosition(0, Gdx.graphics.getHeight() / 2 - newBook.getHeight() - 8);
+        mainMenuTable.setPosition(0, Gdx.graphics.getHeight() / 2 - newBook.getHeight() - 8);
 
+        numberAllBook = new TextField("0",skin);
+      numberAllBookTable.setPosition(numberAllBook.getWidth()+10
+     ,numberAllBook.getHeight()+10);
+
+numberAllBookTable.debug();
 
         newReader = new TextButton("добавить читателя", skin);
         giveBook = new TextButton("выдать книгу", skin);
@@ -120,27 +253,43 @@ sort=new SelectBox(skin);
         myBook = new TextButton("книги в наличии", skin);
         readers = new TextButton("все читатели", skin);
         onHands = new TextButton("книги на руках", skin);
+numberAllBookTable.add(numberAllBook);
+        mainMenuTable.add(newBook).fillX().pad(0, 2, 0, 0);
+        mainMenuTable.add(newReader).fillX().pad(0, 2, 0, 0);
+        mainMenuTable.add(giveBook).fillX().pad(0, 2, 0, 0);
+        mainMenuTable.add(returnBook).fillX().pad(0, 2, 0, 0);
+        mainMenuTable.row().pad(10, 0, 10, 0);
+        mainMenuTable.add(allBook).fillX().pad(2, 2, 0, 0);
+        mainMenuTable.add(myBook).fillX().pad(2, 2, 0, 0);
+        mainMenuTable.add(readers).fillX().pad(2, 2, 0, 0);
+        mainMenuTable.add(onHands).fillX().pad(2, 2, 0, 0);
+        mainMenuTable.add(dolg).fillX().pad(2, 2, 0, 0);
+stage.addActor(numberAllBookTable);
 
+allBook.addListener(new ChangeListener() {
+    @Override
+    public void changed(ChangeEvent event, Actor actor) {
+        stage.clear();
+        stage.addActor(mainMenuTable);
+        stage.addActor(tableListAllBook);
+        stage.addActor(numberAllBookTable);
+        stage.addActor(infoMenuTable);
 
-        table.add(newBook).fillX().pad(0, 2, 0, 0);
-        table.add(newReader).fillX().pad(0, 2, 0, 0);
-        table.add(giveBook).fillX().pad(0, 2, 0, 0);
-        table.add(returnBook).fillX().pad(0, 2, 0, 0);
-        table.row().pad(10, 0, 10, 0);
-        table.add(allBook).fillX().pad(2, 2, 0, 0);
-        table.add(myBook).fillX().pad(2, 2, 0, 0);
-        table.add(readers).fillX().pad(2, 2, 0, 0);
-        table.add(onHands).fillX().pad(2, 2, 0, 0);
-        table.add(dolg).fillX().pad(2, 2, 0, 0);
+        infoMenuTip=1;
+    }
+});
+
 
         newBook.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 stage.clear();
-                stage.addActor(table);
+                stage.addActor(mainMenuTable);
                 stage.addActor(newBookTable);
                 stage.addActor(addNewBookTable);
                 stage.addActor(descriptionTable);
+                stage.addActor(numberAllBookTable);
+                infoMenuTip=-1;
 
                 nameBook.setText(null);
                 ISBN.setText(null);
@@ -278,9 +427,15 @@ if(noError){
               bookArrayList.add(new Book(nameBook.getText(),author.getText(),  Integer.parseInt(number.getText()),
                       (String) genre.getSelected(),description.getText(),coverBook));
           stage.clear();
-          stage.addActor(table);
-          stage.addActor(tableListAllBook);
+          stage.addActor(mainMenuTable);
+    stage.addActor(tableListAllBook);
+    stage.addActor(numberAllBookTable);
+    stage.addActor(infoMenuTable);
           allBookListUpdate();
+    infoMenuTip=1;
+
+
+
 
             }
             }
@@ -289,18 +444,20 @@ if(noError){
     }
 
    public void allBookListUpdate() {
-        Array newItems = new Array<String>();
+
+       newBookAdded = new TextButton(nameBook.getText(),skin);
+newBookAdded.setName(nameBook.getText());
+newBookAdded.addListener(new ChangeListener() {
+    @Override
+    public void changed(ChangeEvent event, Actor actor) {
         for (int i = 0; i < bookArrayList.size(); i++) {
-            newItems.add(bookArrayList.get(i).name);
+          if(bookArrayList.get(i).name.equals(actor.getName())){
+              index=i;
+          }
         }
-      //  allBookList.setItems(newItems);
-
-
-tableListAllBook.setPosition((float) (-0.5*Gdx.graphics.getWidth()+3*allBookList.getWidth()/2),(float)
-        (+0.5*Gdx.graphics.getHeight()-allBookList.getHeight()/2-2*newBook.getHeight()-20));
-
-
-
+    }
+});
+       allBookScrollPaneTable.add(newBookAdded).row();
     }
 
 
