@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 
 public class Screen {
+    Skin skinTree;
 static String descriptionString;
     static Stage stage;
     ScrollPane allBookScrollPane;
@@ -145,7 +146,7 @@ static  boolean bookExclusive;
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-
+skinTree= new Skin(Gdx.files.internal("TreeButton/TreeButton2.json"));
         skin = new Skin(Gdx.files.internal("default/skin/uiskin.json"));
 
 
@@ -175,40 +176,40 @@ static  boolean bookExclusive;
 
     private void infoMenu() {
 
-        authorWindowPreName = new TextField("автор:", skin);
+        authorWindowPreName = new TextField("автор:", skinTree);
         authorWindowPreName.setDisabled(true);
-        numberWindowPreName = new TextField("количество:", skin);
+        numberWindowPreName = new TextField("количество:", skinTree);
         numberWindowPreName.setDisabled(true);
-        numberBookOfHendWindowPreName = new TextField("в наличии:", skin);
-        numberBookOfHendWindow = new TextField("0", skin);
+        numberBookOfHendWindowPreName = new TextField("в наличии:", skinTree);
+        numberBookOfHendWindow = new TextField("0", skinTree);
         numberBookOfHendWindow.setDisabled(true);
         numberBookOfHendWindowPreName.setDisabled(true);
-        genreWindowPreName = new TextField("жанр:", skin);
+        genreWindowPreName = new TextField("жанр:", skinTree);
         genreWindowPreName.setDisabled(true);
 //        descriptionWindowPreName = new TextField("оптисание:", skin);
 //        descriptionWindowPreName.setDisabled(true);
-        nameBookWindowPreName = new TextField("название:", skin);
+        nameBookWindowPreName = new TextField("название:", skinTree);
         nameBookWindowPreName.setDisabled(true);
 
         infoMenuTable.setPosition(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight() / 3+nameBookWindowPreName.getHeight());
 
 
         infoMenu2Table.setPosition(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight() / 2);
-        nameReaderWindowPreName = new TextField("имя:", skin);
+        nameReaderWindowPreName = new TextField("имя:", skinTree);
 
-        surnameReaderWindowPreName = new TextField("фамилия:", skin);
+        surnameReaderWindowPreName = new TextField("фамилия:", skinTree);
         surnameReaderWindowPreName.setDisabled(true);
-        patronymicReaderWindowPreName = new TextField("отчество:", skin);
+        patronymicReaderWindowPreName = new TextField("отчество:", skinTree);
         patronymicReaderWindowPreName.setDisabled(true);
-        classReaderWindowPreName = new TextField("класс:", skin);
+        classReaderWindowPreName = new TextField("класс:", skinTree);
         classReaderWindowPreName.setDisabled(true);
 
 
-        classReaderWindow = new TextField("класс", skin);
+        classReaderWindow = new TextField("класс", skinTree);
         classReaderWindow.setDisabled(true);
-        nameReaderWindow = new TextField("имя", skin);
-        surnameReaderWindow = new TextField("фамилия", skin);
-        patronymicReaderWindow = new TextField("отчество", skin);
+        nameReaderWindow = new TextField("имя", skinTree);
+        surnameReaderWindow = new TextField("фамилия", skinTree);
+        patronymicReaderWindow = new TextField("отчество", skinTree);
         nameReaderWindow.setDisabled(true);
         surnameReaderWindow.setDisabled(true);
         patronymicReaderWindow.setDisabled(true);
@@ -223,17 +224,17 @@ static  boolean bookExclusive;
 // TODO: 27.08.2021 сделать обложку
         // TODO: 27.08.2021 название и тд полностью
 
-        authorWindow = new TextField("автор", skin);
+        authorWindow = new TextField("автор", skinTree);
         authorWindow.setDisabled(true);
-        numberWindow = new TextField("0", skin);
+        numberWindow = new TextField("0", skinTree);
         numberWindow.setDisabled(true);
         imageWindow = new Texture(Gdx.files.internal("noimg.png"));
-        genreWindow = new TextField("жанр", skin);
+        genreWindow = new TextField("жанр", skinTree);
         genreWindow.setDisabled(true);
         descriptionWindow = new Label("описание", skin);
 // TODO: 27.08.2021 добавить список книг у каждого участника 
 
-        nameBookWindow = new TextField("название", skin);
+        nameBookWindow = new TextField("название", skinTree);
         nameBookWindow.setDisabled(true);
         infoMenuTable.add(nameBookWindowPreName).fill(1.1f,1).pad(2, 0, 2, 65);
         infoMenuTable.add(nameBookWindow).fill(1.7f,1).pad(2, 0, 2, 0).row();
@@ -312,7 +313,7 @@ descriptionScrollPane.setScrollingDisabled(true,false);
         bookOnHendNumber.setText(String.valueOf(bookOnHendNumberInt));
         bookOnLibrary.setText(String.valueOf(numberOfBook-bookOnHendNumberInt));
 
-        numberAllBookTable.setPosition(2*numberAllBook.getWidth()+35
+        numberAllBookTable.setPosition(2*numberAllBook.getWidth()+36
                 , numberAllBook.getHeight() + 10);
         renderInfoMenu();
       //  System.out.println(index+" "+readersArrayList.size());
@@ -409,31 +410,31 @@ descriptionScrollPane.setScrollingDisabled(true,false);
     public void meinMenu() {
 
         mainMenuTable.setFillParent(true);
-        newBook = new TextButton("добавить книгу", skin);
+        newBook = new TextButton("добавить книгу", skinTree);
         mainMenuTable.setPosition(0, Gdx.graphics.getHeight() / 2 - newBook.getHeight() - 8);
 
-        readerNumber = new TextField("0", skin);;
-        bookOnHendNumber = new TextField("0", skin);;
-        bookOnLibrary = new TextField("0", skin);;
-        readerNumberPreName = new TextField("читателей:", skin);;
-        bookOnHendNumberPreName = new TextField("книг выданно:", skin);;
-        bookOnLibraryPreName = new TextField("книг в наличии:", skin);;
-        bookOAllPreName = new TextField("книг:", skin);;
-        numberAllBook = new TextField("0", skin);
+        readerNumber = new TextField("0", skinTree);;
+        bookOnHendNumber = new TextField("0", skinTree);;
+        bookOnLibrary = new TextField("0", skinTree);;
+        readerNumberPreName = new TextField("читателей:", skinTree);;
+        bookOnHendNumberPreName = new TextField("книг выданно:", skinTree);;
+        bookOnLibraryPreName = new TextField("книг в наличии:", skinTree);;
+        bookOAllPreName = new TextField("книг:", skinTree);;
+        numberAllBook = new TextField("0", skinTree);
         numberAllBookTable.setPosition(4*numberAllBook.getWidth()
                 , numberAllBook.getHeight() + 10);
 
 
 
-        newReader = new TextButton("добавить читателя", skin);
-        giveBook = new TextButton("выдать книгу", skin);
-        returnBook = new TextButton("вернуть книгу", skin);
-        sort = new SelectBox(skin);
-        dolg = new TextButton("должники", skin);
-        allBook = new TextButton("все книги", skin);
-        myBook = new TextButton("книги в наличии", skin);
-        readers = new TextButton("все читатели", skin);
-        onHands = new TextButton("книги на руках", skin);
+        newReader = new TextButton("добавить читателя", skinTree);
+        giveBook = new TextButton("выдать книгу", skinTree);
+        returnBook = new TextButton("вернуть книгу", skinTree);
+        sort = new SelectBox(skinTree);
+        dolg = new TextButton("должники", skinTree);
+        allBook = new TextButton("все книги", skinTree);
+        myBook = new TextButton("книги в наличии", skinTree);
+        readers = new TextButton("все читатели", skinTree);
+        onHands = new TextButton("книги на руках", skinTree);
         numberAllBookTable.add(bookOAllPreName).pad(2,1,2,1);
         numberAllBookTable.add(numberAllBook).pad(2,1,2,2);
         numberAllBookTable.add(bookOnLibraryPreName).pad(2,30,2,30).fill(1.4f,1);
@@ -629,23 +630,23 @@ onHands.addListener(new ChangeListener() {
         newBookTable.setFillParent(true);
         newBookTable.setPosition(0, 0);
         addNewBookTable.setFillParent(true);
-        nameBook = new TextField("", skin);
+        nameBook = new TextField("", skinTree);
         nameBook.setMessageText("название");
         addNewBookTable.setPosition(0, -5 * nameBook.getHeight());
         descriptionTable.setHeight(0.1f);
         descriptionTable.setFillParent(true);
         descriptionTable.setPosition(0, -3 * nameBook.getHeight());
-        genre = new SelectBox(skin);
+        genre = new SelectBox(skinTree);
         genre.setItems("неопеделенный жанр", "учебники", "классика", "детская литература", "справочная литература", "зарубежная литература");
-        bookAdded = new TextButton("добавить", skin);
-        author = new TextField("", skin);
-        number = new TextField("", skin);
+        bookAdded = new TextButton("добавить", skinTree);
+        author = new TextField("", skinTree);
+        number = new TextField("", skinTree);
 
 
 
-        description = new TextField("", skin);
+        description = new TextField("", skinTree);
         author.setMessageText("автор");
-        pathToImage = new TextField("", skin);
+        pathToImage = new TextField("", skinTree);
         pathToImage.setMessageText("путь до обложки");
         number.setMessageText("количество");
 
@@ -854,7 +855,7 @@ onHands.addListener(new ChangeListener() {
             }
 
             if (bookExclusive){
-                newBookAdded = new TextButton( bookArrayList.get(i).author +"  "+ bookArrayList.get(i).name, skin);
+                newBookAdded = new TextButton( bookArrayList.get(i).author +"  "+ bookArrayList.get(i).name, skinTree);
                 newBookAdded.setName(bookArrayList.get(i).name + bookArrayList.get(i).author + bookArrayList.get(i).genre);
 
                 newBookAdded.addListener(new ChangeListener() {
@@ -905,7 +906,7 @@ onHands.addListener(new ChangeListener() {
             }
 
             if (bookExclusive){
-                newBookAdded = new TextButton( bookArrayList.get(i).author +"  "+ bookArrayList.get(i).name, skin);
+                newBookAdded = new TextButton( bookArrayList.get(i).author +"  "+ bookArrayList.get(i).name, skinTree);
                 newBookAdded.setName(bookArrayList.get(i).name + bookArrayList.get(i).author + bookArrayList.get(i).genre);
 
                 newBookAdded.addListener(new ChangeListener() {
@@ -948,7 +949,7 @@ onHands.addListener(new ChangeListener() {
 
 
             if (bookExclusive){
-            newBookAdded = new TextButton( bookArrayList.get(i).author +"  "+ bookArrayList.get(i).name, skin);
+            newBookAdded = new TextButton( bookArrayList.get(i).author +"  "+ bookArrayList.get(i).name, skinTree);
             newBookAdded.setName(bookArrayList.get(i).name + bookArrayList.get(i).author + bookArrayList.get(i).genre);
 
             newBookAdded.addListener(new ChangeListener() {
@@ -980,7 +981,7 @@ onHands.addListener(new ChangeListener() {
 
         allReaderScrollPaneTable.clear();
         for (int i = 0; i < readersArrayList.size(); i++) {
-            newReaderAdded = new TextButton(readersArrayList.get(i).surname + " " + readersArrayList.get(i).name + " " + readersArrayList.get(i).yearsLern, skin);
+            newReaderAdded = new TextButton(readersArrayList.get(i).surname + " " + readersArrayList.get(i).name + " " + readersArrayList.get(i).yearsLern, skinTree);
             newReaderAdded.setName(readersArrayList.get(i).surname + " " + readersArrayList.get(i).name + " " + readersArrayList.get(i).yearsLern);
             newReaderAdded.addListener(new ChangeListener() {
                 @Override
@@ -1002,18 +1003,18 @@ onHands.addListener(new ChangeListener() {
         newReaderTable.setPosition(0, 0);
 
 
-        nameReader = new TextField("", skin);
+        nameReader = new TextField("", skinTree);
         nameReader.setMessageText("имя нового читателя");
-        surnameReader = new TextField("", skin);
+        surnameReader = new TextField("", skinTree);
         surnameReader.setMessageText("фамилия нового читателя");
-        patronymicReader = new TextField("", skin);
+        patronymicReader = new TextField("", skinTree);
         patronymicReader.setMessageText("отчество нового читателя");
-        classReader = new SelectBox(skin);
+        classReader = new SelectBox(skinTree);
         classReader.setItems("1 класс", "2 класс", "3 класс", "4 класс", "5 класс", "6 класс", "7 класс", "8 класс", "9 класс", "10 класс", "11 класс");
-        errorNewReader = new TextField("заполните обязательные поля", skin);
+        errorNewReader = new TextField("заполните обязательные поля", skinTree);
         errorNewReader.setDisabled(true);
         errorNewReader.setColor(Color.RED);
-        addNewReader = new TextButton("добавить", skin);
+        addNewReader = new TextButton("добавить", skinTree);
 
         newReaderTable.add(surnameReader).size(350, 30).pad(2).row();
         newReaderTable.add(nameReader).size(350, 30).pad(2).row();
@@ -1060,9 +1061,9 @@ onHands.addListener(new ChangeListener() {
 
         giveBookButtonTable.setFillParent(true);
         giveBookButtonTable.setPosition(0, -Gdx.graphics.getHeight() / 4);
-        giveBookButton = new TextButton("выдать книгу", skin);
+        giveBookButton = new TextButton("выдать книгу", skinTree);
         giveBookButtonTable.add(giveBookButton);
-        erorTextField=new TextField("",skin);
+        erorTextField=new TextField("",skinTree);
         erorTextField.setDisabled(true);
         giveBookButton.addListener(new ChangeListener() {
             @Override
@@ -1123,9 +1124,9 @@ break;
         });
         bookOnGivMenuTable.setFillParent(true);
         bookOnGivMenuTable.setPosition(-Gdx.graphics.getWidth() / 4 - 10, 0);
-        genreOfBookOnGivMenuSelectBox = new SelectBox(skin);
-        authorOfBookOnGivMenuSelectBox = new SelectBox(skin);
-        nameOfBookOnGivMenuSelectBox = new SelectBox(skin);
+        genreOfBookOnGivMenuSelectBox = new SelectBox(skinTree);
+        authorOfBookOnGivMenuSelectBox = new SelectBox(skinTree);
+        nameOfBookOnGivMenuSelectBox = new SelectBox(skinTree);
         genreOfBookOnGivMenuSelectBox.setItems("неопеделенный жанр", "учебники", "классика", "детская литература", "справочная литература", "зарубежная литература");
         bookOnGivMenuTable.add(genreOfBookOnGivMenuSelectBox).pad(2).row();
         authorOfBookOnGivMenuSelectBox.addListener(new ChangeListener() {
@@ -1155,8 +1156,8 @@ break;
 
         readersOnGivMenuTable.setFillParent(true);
         readersOnGivMenuTable.setPosition(Gdx.graphics.getWidth() / 4 + 10, 0);
-        classOfReadersOnGivMenuSelectBox = new SelectBox(skin);
-        surnameOfReadersOnGivMenuSelectBox = new SelectBox(skin);
+        classOfReadersOnGivMenuSelectBox = new SelectBox(skinTree);
+        surnameOfReadersOnGivMenuSelectBox = new SelectBox(skinTree);
         classOfReadersOnGivMenuSelectBox.setItems("1 класс", "2 класс", "3 класс", "4 класс", "5 класс", "6 класс", "7 класс", "8 класс", "9 класс", "10 класс", "11 класс");
 
         readersOnGivMenuTable.add(classOfReadersOnGivMenuSelectBox).pad(2).row();
@@ -1251,10 +1252,10 @@ break;
         returnMenuTable.setFillParent(true);
         returnMenuTable.setPosition(0, 0);
 
-        classOfReadersOnReturnMenuSelectBox = new SelectBox(skin);
-        surnameOfReadersOnReturnMenuSelectBox = new SelectBox(skin);
-        bookOnReturnMenuSelectBox=  new SelectBox(skin);
-        returnBookButton=new TextButton("вернуть книгу",skin);
+        classOfReadersOnReturnMenuSelectBox = new SelectBox(skinTree);
+        surnameOfReadersOnReturnMenuSelectBox = new SelectBox(skinTree);
+        bookOnReturnMenuSelectBox=  new SelectBox(skinTree);
+        returnBookButton=new TextButton("вернуть книгу",skinTree);
         classOfReadersOnReturnMenuSelectBox.setItems("1 класс", "2 класс", "3 класс", "4 класс", "5 класс", "6 класс", "7 класс", "8 класс", "9 класс", "10 класс", "11 класс");
 
         returnMenuTable.add(classOfReadersOnReturnMenuSelectBox).pad(2).row();
