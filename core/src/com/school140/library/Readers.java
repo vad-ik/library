@@ -3,17 +3,20 @@ package com.school140.library;
 import java.util.ArrayList;
 
 public class Readers {
-    int id;
+
     String name;
     String surname;
-   // ArrayList<String> bookGet=new ArrayList<>();
+    String patronymic;
     int yearsLern;
 
-
-    public Readers(int id, String name, String surname, int yearsLern) {
-        this.id = id;
+    public Readers(String name, String surname, String patronymic, int yearsLern) {
         this.name = name;
         this.surname = surname;
+        this.patronymic = patronymic;
         this.yearsLern = yearsLern;
     }
+
+
+
+
 }
