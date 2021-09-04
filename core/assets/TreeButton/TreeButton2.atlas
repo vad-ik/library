@@ -4,6 +4,13 @@ size: 512,512
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
+myFontMDA_0
+  rotate: false
+  xy: 1, 151
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
 sd
   rotate: false
   xy: 1, 99
@@ -25,10 +32,10 @@ ssdsdsdsdsdsdsdsdsdsd
   orig: 150, 50
   offset: 0, 0
   index: -1
-myFontMDA_0
+cursor
   rotate: false
-  xy: 1, 151
-  size: 256, 256
-  orig: 256, 256
+  xy: 153, 141
+  size: 3, 8
+  orig: 3, 8
   offset: 0, 0
   index: -1

@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.util.Random;
+
 public class Library extends ApplicationAdapter {
     SpriteBatch batch;
 
@@ -13,9 +15,14 @@ public class Library extends ApplicationAdapter {
     Screen screen;
     Texture logo;
     int logoSize;
+Random random;
+    Texture background;
+
 
     @Override
     public void create() {
+random=new Random();
+      background=new Texture("background"+(random.nextInt(3)+1)+".png") ;
 
         batch = new SpriteBatch();
         allBook = 0;
@@ -29,20 +36,34 @@ public class Library extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
+        batch.draw(background,0,0,1000,600);
 
         Screen.imgRender(batch);
 
         batch.end();
         Screen.render();
+
+
     }
 
     @Override
     public void resize(int width, int height) {
-        if ((Gdx.graphics.getHeight()<600)||(Gdx.graphics.getWidth()<1000)){
-            Gdx.graphics.setWindowedMode(1000,600);
-        }
+        // TODO: 01.09.2021 skreen size!!!
+//        if ((Gdx.graphics.getHeight()<800)||(Gdx.graphics.getWidth()<1200)){
+//            if ((Gdx.graphics.getHeight()==1080)||(Gdx.graphics.getWidth()==1920)){
+//
+//            }else{
+//                if ((Gdx.graphics.getHeight()==900)||(Gdx.graphics.getWidth()==1440)){
+//
+//                }else{
+//                    Gdx.graphics.setWindowedMode(1200,800);
+//                }
+//
+//            }
+//
+//        }
+        Gdx.graphics.setWindowedMode(1200,800);
 
-        // See below for what true means.
         Screen.stage.getViewport().update(width, height, true);
 
         screen.mainMenuTable.setPosition(0, Gdx.graphics.getHeight() / 2 - screen.newBook.getHeight() - 8);
@@ -57,7 +78,7 @@ public class Library extends ApplicationAdapter {
                 .size(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 2 * screen.bookAdded.getHeight() - 3*screen.newBook.getHeight());
         screen.tableListAllReader.setPosition(Gdx.graphics.getWidth() / 4 + 10, Gdx.graphics.getHeight() / 2 - 30);
 
-        Screen.infoMenu2Table.setPosition(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight() / 2);
+       // Screen.infoMenu2Table.setPosition(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight() / 2);
         screen.readersOnGivMenuTable.setPosition(Gdx.graphics.getWidth() / 4 + 10, 0);
         Screen.giveBookButtonTable.setPosition(0, -Gdx.graphics.getHeight() / 4);
         screen.bookOnGivMenuTable.setPosition(-Gdx.graphics.getWidth() / 4 + 10, 0);
@@ -66,7 +87,7 @@ public class Library extends ApplicationAdapter {
         Screen.descriptionInfoTable.add(screen.descriptionScrollPane).size(Gdx.graphics.getWidth()/3-20,Gdx.graphics.getHeight()/5);
         Screen.descriptionInfoTable.setPosition(Gdx.graphics.getWidth()/4*3+80,Gdx.graphics.getHeight() / 3+ Screen.nameBookWindowPreName.getHeight()-3* Screen.numberBookOfHendWindow.getHeight()-Gdx.graphics.getHeight()/10);
 
-
+        screen.addNewBookTable.setPosition(0, -5 * screen.nameBook.getHeight());
 
         }
 
@@ -77,6 +98,7 @@ public class Library extends ApplicationAdapter {
         Screen.imageWindow.dispose();
         Screen.skin.dispose();
         Screen.coverBook.dispose();
+
     }
 
 
