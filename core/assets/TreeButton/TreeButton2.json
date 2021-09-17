@@ -51,7 +51,8 @@
 		"font": "myFontMDA",
 		"fontColor": "RGBA_0_0_0_255",
 		"background": "sd",
-		"cursor": "cursor"
+		"cursor": "cursor",
+		"selection": "listUsing"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle": {

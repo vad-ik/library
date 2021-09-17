@@ -1,6 +1,5 @@
 package com.school140.library;
 
-import java.util.ArrayList;
 
 public class Readers {
 
@@ -8,12 +7,14 @@ public class Readers {
     String surname;
     String patronymic;
     int yearsLern;
-
-    public Readers(String name, String surname, String patronymic, int yearsLern) {
+String charClass;
+    public Readers(String name, String surname, String patronymic, int yearsLern,String charClass) {
         this.name = name;
         this.surname = surname;
         this.patronymic = patronymic;
         this.yearsLern = yearsLern;
+        this. charClass= charClass;
+
     }
 
 

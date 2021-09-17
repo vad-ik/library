@@ -25,7 +25,7 @@ Readers reader;
         Library.allBook+=1;
         this.coverBook=coverBook;
     }
-//book isbn
+
 
 
 
