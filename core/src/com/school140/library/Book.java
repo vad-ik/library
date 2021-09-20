@@ -1,23 +1,28 @@
 package com.school140.library;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
-public class Book {
+public class Book  {
     String name;
     String author;
-Texture coverBook;
+String coverBook;
+
 String genre;
+    String description;
 GregorianCalendar dataOfGiven;
-String description;
 Readers reader;
     public Book() {
 
     }
 
-    public Book(String name, String author , String genre, String description,Texture coverBook) {
+
+    public Book(String name, String author , String genre, String description,String coverBook) {
         this.name = name;
         this.author = author;
         this.genre = genre;
@@ -25,8 +30,6 @@ Readers reader;
         Library.allBook+=1;
         this.coverBook=coverBook;
     }
-
-
 
 
 

@@ -7,15 +7,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 public class Screen {
     Skin skinTree;
@@ -30,6 +28,7 @@ public class Screen {
     static public int bookNumber;
     static public int bookNumberOfHend;
     GregorianCalendar dataOfNewClass;
+    // TODO: 20.09.2021  dataOfNewClass сделать на лето
     static GregorianCalendar nowData;
     static int index = -1;
     Table mainMenuTable = new Table();
@@ -52,6 +51,7 @@ public class Screen {
     TextButton newReader;
     boolean noNullPointerException = true;
     SelectBox sort;
+    String uniqueID ;
     boolean noError = true;
     TextButton giveBook;
     TextButton returnBook;
@@ -72,9 +72,9 @@ public class Screen {
     static TextField numberWindow;
     static Texture imageWindow;
     static TextField genreWindow;
-    int timeDolg = 14;
+
     static int bookOnHendNumberInt = 0;
-// TODO: 17.08.2021 сделать сохранение  bookArrayList readersArrayList timeDolg и bookOnHendNumberInt;
+
 
     static TextField readerNumber;
     static TextField bookOnHendNumber;
@@ -160,7 +160,7 @@ public class Screen {
     TextField description;
     TextButton bookAdded;
     static Skin skin;
-    static Texture coverBook;
+    static String coverBook;
     static ArrayList<Book> bookArrayList = new ArrayList<>();
     static ArrayList<Readers> readersArrayList = new ArrayList<>();
     Table allReaderScrollPaneTable = new Table();
@@ -188,7 +188,7 @@ public class Screen {
         infoMenu();
 
         stage.addActor(mainMenuTable);
-        coverBook = new Texture(Gdx.files.internal("noimg.png"));
+        coverBook = ("noimg.png");
     }
 
     void newSerchMenu() {
@@ -528,7 +528,7 @@ public class Screen {
         numberWindow = new TextField(" 0", skinTree);
         numberWindow.setDisabled(true);
         imageWindow = new Texture(Gdx.files.internal("noimg.png"));
-        genreWindow = new TextField(" Жнр", skinTree);
+        genreWindow = new TextField(" Жанр", skinTree);
         genreWindow.setDisabled(true);
         descriptionWindow = new Label(" Описание", skin);
 
@@ -602,8 +602,7 @@ public class Screen {
         stage.addActor(tableListAllBook);
 
     }
-// TODO: 16.09.2021 книги на руках вылезают за рамки
-// TODO: 16.09.2021 выход
+// TODO: 16.09.2021 выход в полноэкранном
 
     public static void render() {
 
@@ -651,7 +650,7 @@ public class Screen {
                             numberBookOfHendWindow.setText(" " + String.valueOf(bookNumberOfHend));
 
 
-                            imageWindow = bookArrayList.get(index).coverBook;
+                            imageWindow = new Texture(Gdx.files.internal(bookArrayList.get(index).coverBook));
                             genreWindow.setText(" " + bookArrayList.get(index).genre);
 
 
@@ -793,7 +792,6 @@ public class Screen {
                 infoMenuTip = 2;
                 nowData = new GregorianCalendar();
                 allDolgListUpdate();
-                nowData.add(GregorianCalendar.DAY_OF_MONTH, -timeDolg);
                 meinMenuUsed();
                 stage.addActor(tableListAllReader);
             }
@@ -1021,6 +1019,7 @@ public class Screen {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
 
+                error = new Label(" ", skin, "red");
 
                 nameBook.setColor(1, 1, 1, 1);
                 author.setColor(1, 1, 1, 1);
@@ -1045,7 +1044,10 @@ public class Screen {
 
                 if (!pathToImage.getText().equals("")) {
                     try {
-                        coverBook = new Texture(Gdx.files.absolute(pathToImage.getText()));
+                        uniqueID = UUID.randomUUID().toString();
+                        Gdx.files.absolute(pathToImage.getText()).copyTo(Gdx.files.internal(uniqueID));
+
+                        coverBook =(uniqueID);
                     } catch (GdxRuntimeException e) {
                         pathToImage.setText(null);
 
@@ -1058,7 +1060,7 @@ public class Screen {
                     }
 
                 } else {
-                    coverBook = new Texture(Gdx.files.internal("noimg.png"));
+                    coverBook =("noimg.png");
                 }
 
                 if ((nameBook.getText().equals("")) || (author.getText().equals("")) || (number.getText().equals(""))) {
@@ -1074,6 +1076,30 @@ public class Screen {
                     addNewBookTable.add(error).fill().pad(0, 4, 0, 0);
                 }
 
+                if (Integer.parseInt(number.getText())>200){
+
+                    error.clear();
+                    addNewBookTable.clear();
+                    noError = false;
+                    error = new Label(" максимум 200 книг за раз", skin, "red");
+
+                    addNewBookTable.add(number).pad(0, 0, 0, 0);
+                    addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0).row();
+                    addNewBookTable.add(error).fill().pad(0, 4, 0, 0);
+                }
+if (bookArrayList.size()>300000){
+    error.clear();
+    addNewBookTable.clear();
+    noError = false;
+    error = new Label(" максимум 300 000 книг", skin, "red");
+
+    addNewBookTable.add(number).pad(0, 0, 0, 0);
+    addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0).row();
+    addNewBookTable.add(error).fill().pad(0, 4, 0, 0);
+}
+
+
+
                 if (noError) {
                     numberOfBook += Integer.parseInt(number.getText());
 
@@ -1082,12 +1108,23 @@ public class Screen {
                     addNewBookTable.add(number).pad(0, 0, 0, 50);
                     addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0);
                     if (!pathToImage.getText().equals("")) {
-                        coverBook = new Texture(Gdx.files.absolute(pathToImage.getText()));
+                        uniqueID = UUID.randomUUID().toString();
+                        Gdx.files.absolute(pathToImage.getText()).copyTo(Gdx.files.internal(uniqueID));
+
+                        coverBook =(uniqueID);
                     }
+
+                    if ((Objects.equals(nameBook.getText(), "darkCat")&&(Objects.equals(author.getText(), "Хорошков Вадим")))){
+                        description.setText("данную программу написал Хорошков Вадим");
+                    }
+
+
+
                     descriptionString = "";
                     for (int i = 1; i < description.getText().length() + 1; i++) {
                         descriptionString += description.getText().charAt(i - 1);
-                        if (i % 20 == 0) {
+
+                        if ((i%30 / 20 > 0)&&(( String.valueOf(description.getText().charAt(i - 1))).equals(" "))) {
                             descriptionString += "\n";
                         }
                     }
@@ -1399,7 +1436,7 @@ public class Screen {
         }
         bookOnReaderTable.clear();
         bookOnReaderTable.add(bookThisReaderPreName).pad(2);
-        bookOnReaderTable.add(bookThisReader).pad(2, 65, 2, 2).fill(1.8f, 1);
+        bookOnReaderTable.add(bookThisReader).pad(2, 2, 2, 2).fill(1, 1);
     }
     public void WhatBookHeHaveDolg(Readers readers2) {
 
