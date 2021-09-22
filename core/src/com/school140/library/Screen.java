@@ -156,6 +156,7 @@ public class Screen {
     Array<String> charForSerch = new Array();
     Array<String> dolgArrayList = new Array();
     TextField pathToImage;
+    TextButton exit;
     SelectBox genre;
     TextField description;
     TextButton bookAdded;
@@ -405,7 +406,12 @@ public class Screen {
                     if (infoMenuTip == 2) {
                         WhatBookHeHave(readersArrayList.get(index));
                         if (textFieldBooks.size == 0) {
-                            readersArrayList.remove(index);
+                            try {
+                                readersArrayList.remove(index);
+                            }catch (NullPointerException e){
+
+                            }
+
                             stage.clear();
                             stage.addActor(mainMenuTable);
                             stage.addActor(tableListAllReader);
@@ -431,7 +437,11 @@ public class Screen {
 
                             if (bookArrayList.get(i).reader == null) {
                                 if ((bookArrayList.get(index).name + bookArrayList.get(index).author).equals(bookArrayList.get(i).name + bookArrayList.get(i).author)) {
-                                    bookArrayList.remove(i);
+                                  try {
+                                      bookArrayList.remove(i);
+                                  }catch (NullPointerException e){
+
+                                  }
                                     stage.clear();
                                     stage.addActor(mainMenuTable);
                                     stage.addActor(tableListAllBook);
@@ -602,7 +612,6 @@ public class Screen {
         stage.addActor(tableListAllBook);
 
     }
-// TODO: 16.09.2021 выход в полноэкранном
 
     public static void render() {
 
@@ -720,6 +729,7 @@ public class Screen {
     public void meinMenu() {
 
         mainMenuTable.setFillParent(true);
+        exit=new TextButton("выход",skinTree);
         newBook = new TextButton(" Добавить книгу", skinTree);
         mainMenuTable.setPosition(0, Gdx.graphics.getHeight() / 2 - newBook.getHeight() - 8);
 
@@ -773,6 +783,7 @@ public class Screen {
         mainMenuTable.add(newReader).fillX().pad(0, 2, 0, 0);
         mainMenuTable.add(giveBook).fillX().pad(0, 2, 0, 0);
         mainMenuTable.add(returnBook).fillX().pad(0, 2, 0, 0);
+        mainMenuTable.add(exit).fillX().pad(0, 2, 0, 0);
         mainMenuTable.row().pad(10, 0, 10, 0);
         mainMenuTable.add(allBook).fillX().pad(2, 2, 0, 0);
         mainMenuTable.add(myBook).fillX().pad(2, 2, 0, 0);
@@ -780,6 +791,12 @@ public class Screen {
         mainMenuTable.add(onHands).fillX().pad(2, 2, 0, 0);
         mainMenuTable.add(dolg).fillX().pad(2, 2, 0, 0);
         stage.addActor(numberAllBookTable);
+        exit.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.exit();
+            }
+        });
         dolg.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

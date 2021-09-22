@@ -12,19 +12,29 @@ import java.util.Random;
 
 public class Library extends ApplicationAdapter {
     SpriteBatch batch;
-
+float startLogo=1000;
     static int allBook;
     Screen screen;
-    Texture logo;
-    int logoSize;
-Random random;
-    Texture background;
 
+    Random random;
+    Texture background;
+Texture logo;
     Preferences pref;
+    Preferences prefBackup;
 
     @Override
     public void create() {
         pref=Gdx.app.getPreferences("LibrarySave");
+        prefBackup=Gdx.app.getPreferences("LibrarySaveBackup");
+       if ((pref.get().size()==0 )&&(prefBackup.get().size()!=0)){
+           pref=Gdx.app.getPreferences("LibrarySaveBackup");
+
+       }
+        if ((pref.get().size()!=0 )){
+            prefBackup=Gdx.app.getPreferences("LibrarySave");
+
+        }
+
         random=new Random();
       background=new Texture("background"+(random.nextInt(3)+1)+".png") ;
 
@@ -32,8 +42,15 @@ Random random;
         allBook = 0;
         screen = new Screen();
 
-        screen.dataOfNewClass=new GregorianCalendar();
-        // TODO: 17.09.2021   <------загрузка сэйвов
+        screen.dataOfNewClass=new GregorianCalendar(2021,7,1);
+if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
+    screen.dataOfNewClass = new GregorianCalendar(
+            pref.getInteger("dataOfNewClassDay"),
+            pref.getInteger("dataOfNewClassMount"),
+            pref.getInteger("dataOfNewClassYear")
+    );
+}
+
          for (int i = 0; i < pref.getInteger("readerLength",0); i++) {
             Screen.readersArrayList.add(new Readers(
             pref.getString( "name"+i),
@@ -89,11 +106,14 @@ Random random;
 
 
 
-        if (screen.dataOfNewClass.getTimeInMillis()+3.156e+10<(new GregorianCalendar()).getTimeInMillis()){
-    for (Readers readers : Screen.readersArrayList) {
-        readers.yearsLern++;
-    }
-}
+       if ((screen.dataOfNewClass.getTime().getMonth()>5)&&(screen.dataOfNewClass.getTime().getMonth()<9)) {
+           if (screen.dataOfNewClass.getTimeInMillis() + 3.156e+10 < (new GregorianCalendar()).getTimeInMillis()) {
+               for (Readers readers : Screen.readersArrayList) {
+                   readers.yearsLern++;
+               }
+               screen.dataOfNewClass.add(GregorianCalendar.YEAR,1);
+           }
+       }
 
     }
 
@@ -108,12 +128,22 @@ Random random;
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
+
         batch.draw(background,0,0,1000,600);
 
         Screen.imgRender(batch);
 
-        batch.end();
         Screen.render();
+
+
+        if (startLogo<1109) {
+            logo=new Texture(Gdx.files.internal("logo/foto0000_"+(int)startLogo+".jpg"));
+            batch.draw(logo, 0, 0, 1366, 768);
+            startLogo+=0.5;
+        }
+
+
+        batch.end();
 
 
     }
@@ -167,10 +197,8 @@ Random random;
         }
 
     @Override
-    public void dispose() {
-
-        // TODO: 19.09.2021 <----сохранять здесь
-        pref.putInteger("bookLength", Screen.bookArrayList.size());
+    public  void dispose() {
+       pref.putInteger("bookLength", Screen.bookArrayList.size());
         for (int i = 0; i < Screen.bookArrayList.size(); i++) {
              pref.putString("bookName"+i, Screen.bookArrayList.get(i).name);
             pref.putString("bookAuthor"+i, Screen.bookArrayList.get(i).author);
@@ -207,6 +235,12 @@ Random random;
         pref.putInteger("bookOnHendNumberInt",Screen.bookOnHendNumberInt);
        pref.putInteger("bookNumber",Screen.numberOfBook);
         pref.putInteger("bookNumberOfHend",Screen.bookNumberOfHend);
+
+        pref.putInteger("dataOfNewClassDay",screen.dataOfNewClass.getTime().getDate());
+        pref.putInteger("dataOfNewClassMount",screen.dataOfNewClass.getTime().getMonth());
+        pref.putInteger("dataOfNewClassYear",screen.dataOfNewClass.getWeekYear());
+
+
 
 
 pref.flush();
