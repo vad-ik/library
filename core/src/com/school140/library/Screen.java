@@ -324,8 +324,8 @@ redactMenu();
         });
 
         searchMenuBookTable.add(genreSearch).pad(2);
-        searchMenuBookTable.add(authorSearch).pad(2);
-        searchMenuBookTable.add(nameBookSearch).pad(2, 40, 2, 2).fill(1.5f, 1);
+        searchMenuBookTable.add(authorSearch).pad(2).size(150,50);
+        searchMenuBookTable.add(nameBookSearch).pad(2);
         stage.addActor(searchMenuBookTable);
 
 
