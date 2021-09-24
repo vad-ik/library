@@ -2,6 +2,7 @@ package com.school140.library;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -21,19 +22,17 @@ float startLogo=1000;
 Texture logo;
     Preferences pref;
     Preferences prefBackup;
-
     @Override
     public void create() {
         pref=Gdx.app.getPreferences("LibrarySave");
+
         prefBackup=Gdx.app.getPreferences("LibrarySaveBackup");
-       if ((pref.get().size()==0 )&&(prefBackup.get().size()!=0)){
-           pref=Gdx.app.getPreferences("LibrarySaveBackup");
+        if ((pref.get().size()==0 )&&(prefBackup.get().size()!=0)){
+
+         //  pref=Gdx.app.getPreferences("LibrarySaveBackup");
 
        }
-        if ((pref.get().size()!=0 )){
-            prefBackup=Gdx.app.getPreferences("LibrarySave");
 
-        }
 
         random=new Random();
       background=new Texture("background"+(random.nextInt(3)+1)+".png") ;
@@ -45,20 +44,22 @@ Texture logo;
         screen.dataOfNewClass=new GregorianCalendar(2021,7,1);
 if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
     screen.dataOfNewClass = new GregorianCalendar(
-            pref.getInteger("dataOfNewClassDay"),
+            pref.getInteger("dataOfNewClassYear"),
             pref.getInteger("dataOfNewClassMount"),
-            pref.getInteger("dataOfNewClassYear")
+            pref.getInteger("dataOfNewClassDay")
     );
 }
 
          for (int i = 0; i < pref.getInteger("readerLength",0); i++) {
-            Screen.readersArrayList.add(new Readers(
+
+                 Screen.readersArrayList.add(new Readers(
             pref.getString( "name"+i),
             pref.getString( "surname"+i),
             pref.getString( "patronymic"+i),
             pref.getInteger( "yearsLern"+i),
             pref.getString("charClass"+i)));
-        }
+
+    }
 
         for (int i = 0; i < pref.getInteger("bookLength", 0); i++) {
 
@@ -104,17 +105,73 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
 
 
 
-
-
-       if ((screen.dataOfNewClass.getTime().getMonth()>5)&&(screen.dataOfNewClass.getTime().getMonth()<9)) {
+       if (((new GregorianCalendar()).getTime().getMonth()>5)&&((new GregorianCalendar()).getTime().getMonth()<9)) {
            if (screen.dataOfNewClass.getTimeInMillis() + 3.156e+10 < (new GregorianCalendar()).getTimeInMillis()) {
                for (Readers readers : Screen.readersArrayList) {
                    readers.yearsLern++;
+
+
+               }
+               int readerSize=Screen.readersArrayList.size();
+               for (int i = 0; i < readerSize; i++) {
+                   if(  Screen.readersArrayList.get(i).yearsLern==12){
+                       Screen.readersArrayList.remove(i);
+                       readerSize--;
+                       i--;
+                   }
+
+
                }
                screen.dataOfNewClass.add(GregorianCalendar.YEAR,1);
            }
        }
+        if ((pref.get().size()!=0 )){
+            prefBackup.putInteger("bookLength", Screen.bookArrayList.size());
+            for (int i = 0; i < Screen.bookArrayList.size(); i++) {
+                prefBackup.putString("bookName"+i, Screen.bookArrayList.get(i).name);
+                prefBackup.putString("bookAuthor"+i, Screen.bookArrayList.get(i).author);
+                prefBackup.putString("bookDescription"+i, Screen.bookArrayList.get(i).description);
+                prefBackup.putString("bookGenre"+i, Screen.bookArrayList.get(i).genre);
+                prefBackup.putBoolean("bookGiven"+i, (Screen.bookArrayList.get(i).reader!=null));
+                prefBackup.putString("bookCover"+i, (Screen.bookArrayList.get(i).coverBook));
+                if(Screen.bookArrayList.get(i).reader!=null){
+                    prefBackup.putInteger("bookReaderDateYear"+i, Screen.bookArrayList.get(i).dataOfGiven.getWeekYear());
+                    prefBackup.putInteger("bookReaderDateMount"+i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getMonth());
+                    prefBackup.putInteger("bookReaderDateDay"+i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getDate());
 
+                    prefBackup.putString("bookReaderName"+i, Screen.bookArrayList.get(i).reader.name);
+                    prefBackup.putString("bookReaderSurname"+i, Screen.bookArrayList.get(i).reader.surname);
+                    prefBackup.putString("bookReaderPatronymic"+i, Screen.bookArrayList.get(i).reader.patronymic);
+                    prefBackup.putInteger("bookReaderYearsLern"+i, Screen.bookArrayList.get(i).reader.yearsLern);
+                    prefBackup.putString("bookReaderCharClass"+i, Screen.bookArrayList.get(i).reader.charClass);
+
+                }
+
+
+            }
+            prefBackup.putInteger("readerLength", Screen.readersArrayList.size());
+            for (int i = 0; i < Screen.readersArrayList.size(); i++) {
+                prefBackup.putString( "name"+i,Screen.readersArrayList.get(i).name);
+                prefBackup.putString( "surname"+i,Screen.readersArrayList.get(i).surname);
+                prefBackup.putString( "patronymic"+i,Screen.readersArrayList.get(i).patronymic);
+                prefBackup.putInteger( "yearsLern"+i,Screen.readersArrayList.get(i).yearsLern);
+                prefBackup.putString("charClass"+i,Screen.readersArrayList.get(i).charClass);
+            }
+
+
+
+            prefBackup.putInteger("bookOnHendNumberInt",Screen.bookOnHendNumberInt);
+            prefBackup.putInteger("bookNumber",Screen.numberOfBook);
+            prefBackup.putInteger("bookNumberOfHend",Screen.bookNumberOfHend);
+
+            prefBackup.putInteger("dataOfNewClassDay",screen.dataOfNewClass.getTime().getDate());
+            prefBackup.putInteger("dataOfNewClassMount",screen.dataOfNewClass.getTime().getMonth());
+            prefBackup.putInteger("dataOfNewClassYear",screen.dataOfNewClass.getWeekYear());
+
+
+
+            prefBackup.flush();
+        }
     }
 
     @Override
@@ -133,37 +190,28 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
 
         Screen.imgRender(batch);
 
-        Screen.render();
 
+if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
+    startLogo=1111;
+}
 
         if (startLogo<1109) {
             logo=new Texture(Gdx.files.internal("logo/foto0000_"+(int)startLogo+".jpg"));
-            batch.draw(logo, 0, 0, 1366, 768);
+            batch.draw(logo, 0, 0, 1000, 600);
             startLogo+=0.5;
         }
 
 
         batch.end();
-
+        if (startLogo>1108) {
+            Screen.render();
+        }
 
     }
 
     @Override
     public void resize(int width, int height) {
-        // TODO: 01.09.2021 skreen size!!!
-//        if ((Gdx.graphics.getHeight()<800)||(Gdx.graphics.getWidth()<1200)){
-//            if ((Gdx.graphics.getHeight()==1080)||(Gdx.graphics.getWidth()==1920)){
-//
-//            }else{
-//                if ((Gdx.graphics.getHeight()==900)||(Gdx.graphics.getWidth()==1440)){
-//
-//                }else{
-//                    Gdx.graphics.setWindowedMode(1200,800);
-//                }
-//
-//            }
-//
-//        }
+
        if ((Gdx.graphics.getDisplayMode(Gdx.graphics.getMonitor()).height==768)&&(Gdx.graphics.getDisplayMode(Gdx.graphics.getMonitor()).width==1366)){
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode(Gdx.graphics.getMonitor()));
         }else {
@@ -198,7 +246,9 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
 
     @Override
     public  void dispose() {
-       pref.putInteger("bookLength", Screen.bookArrayList.size());
+        pref=Gdx.app.getPreferences("LibrarySave");
+
+        pref.putInteger("bookLength", Screen.bookArrayList.size());
         for (int i = 0; i < Screen.bookArrayList.size(); i++) {
              pref.putString("bookName"+i, Screen.bookArrayList.get(i).name);
             pref.putString("bookAuthor"+i, Screen.bookArrayList.get(i).author);
@@ -236,6 +286,8 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
        pref.putInteger("bookNumber",Screen.numberOfBook);
         pref.putInteger("bookNumberOfHend",Screen.bookNumberOfHend);
 
+
+
         pref.putInteger("dataOfNewClassDay",screen.dataOfNewClass.getTime().getDate());
         pref.putInteger("dataOfNewClassMount",screen.dataOfNewClass.getTime().getMonth());
         pref.putInteger("dataOfNewClassYear",screen.dataOfNewClass.getWeekYear());
@@ -248,6 +300,9 @@ pref.flush();
         Screen.stage.dispose();
         Screen.imageWindow.dispose();
         Screen.skin.dispose();
+        logo.dispose();
+        background.dispose();
+
 
     }
 
