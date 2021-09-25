@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.GregorianCalendar;
+import java.util.Objects;
 import java.util.Random;
 
 public class Library extends ApplicationAdapter {
@@ -29,7 +30,7 @@ Texture logo;
         prefBackup=Gdx.app.getPreferences("LibrarySaveBackup");
         if ((pref.get().size()==0 )&&(prefBackup.get().size()!=0)){
 
-         //  pref=Gdx.app.getPreferences("LibrarySaveBackup");
+          pref=Gdx.app.getPreferences("LibrarySaveBackup");
 
        }
 
@@ -64,13 +65,15 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
         for (int i = 0; i < pref.getInteger("bookLength", 0); i++) {
 
 
-            Screen.bookArrayList.add(new Book(
-                    pref.getString("bookName"+i),
-                    pref.getString("bookAuthor"+i),
-                    pref.getString("bookGenre"+i),
-                    pref.getString("bookDescription"+i)
-                    ,pref.getString("bookCover"+i)
-                    ));
+    Screen.bookArrayList.add(new Book(
+            pref.getString("bookName" + i),
+            pref.getString("bookAuthor" + i),
+            pref.getString("bookGenre" + i),
+            pref.getString("bookDescription" + i)
+            , pref.getString("bookCover" + i)
+    ));
+
+
             if(pref.getBoolean("bookGiven"+i)){
 
                 for (Readers readers : Screen.readersArrayList) {
@@ -102,7 +105,6 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
         screen.bookOnHendNumberInt=pref.getInteger("bookOnHendNumberInt");
         screen.numberOfBook=pref.getInteger("bookNumber");
         screen.bookNumberOfHend=pref.getInteger("bookNumberOfHend");
-
 
 
        if (((new GregorianCalendar()).getTime().getMonth()>5)&&((new GregorianCalendar()).getTime().getMonth()<9)) {
@@ -171,7 +173,11 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
 
 
             prefBackup.flush();
+
+
         }
+        screen.numberOfBook=Screen.bookArrayList.size();
+
     }
 
     @Override
@@ -192,13 +198,16 @@ if (  pref.getInteger("dataOfNewClassDay",100)!=100) {
 
 
 if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
-    startLogo=1111;
+    startLogo=1111; logo.dispose();
 }
 
         if (startLogo<1109) {
             logo=new Texture(Gdx.files.internal("logo/foto0000_"+(int)startLogo+".jpg"));
             batch.draw(logo, 0, 0, 1000, 600);
             startLogo+=0.5;
+            if (startLogo==1109){
+                logo.dispose();
+            }
         }
 
 
@@ -223,15 +232,14 @@ if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
         Screen.infoMenuTable.setPosition(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight() / 3+ Screen.nameBookWindowPreName.getHeight());
         screen.tableListAllBook.clear();
         screen.tableListAllBook.add(screen.allBookScrollPane)
-                .size(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() - 7 * screen.bookAdded.getHeight() );
-        screen.tableListAllBook.setPosition(Gdx.graphics.getWidth() / 4 -Gdx.graphics.getWidth() / 16, Gdx.graphics.getHeight() / 2- screen.bookAdded.getHeight()/2);
+                .size(Gdx.graphics.getWidth() / 2-100, Gdx.graphics.getHeight() - 7 * screen.bookAdded.getHeight() );
+        screen.tableListAllBook.setPosition(Gdx.graphics.getWidth() / 3 -Gdx.graphics.getWidth() / 10, Gdx.graphics.getHeight() / 2- screen.bookAdded.getHeight()/2);
 
         screen.tableListAllReader.clear();
         screen.tableListAllReader.add(screen.allReaderScrollPane)
                 .size(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() - 4 * screen.bookAdded.getHeight() - 3* Screen.newBook.getHeight());
         screen.tableListAllReader.setPosition(Gdx.graphics.getWidth() / 4 + 10, Gdx.graphics.getHeight() / 2 );
 
-       // Screen.infoMenu2Table.setPosition(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight() / 2);
         screen.readersOnGivMenuTable.setPosition(Gdx.graphics.getWidth() / 4 + 10, 0);
         Screen.giveBookButtonTable.setPosition(0, -Gdx.graphics.getHeight() /4);
         screen.bookOnGivMenuTable.setPosition(-Gdx.graphics.getWidth() / 4 + 10, 0);
@@ -300,7 +308,9 @@ pref.flush();
         Screen.stage.dispose();
         Screen.imageWindow.dispose();
         Screen.skin.dispose();
-        logo.dispose();
+        Screen.skinTree.dispose();
+
+
         background.dispose();
 
 
