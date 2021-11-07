@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.Objects;
 import java.util.Random;
@@ -191,6 +194,24 @@ Boolean save=true;
         screen.getAuthorForSearch();
         screen.authorSearch.setItems(screen.authorForSerch);
         saveAll();
+
+
+
+
+
+//        try(FileWriter writer = new FileWriter("Log.txt", true))
+//        {
+//            // запись всей строки
+//            String text = "Hello Gold!";
+//            writer.write(text);
+//            writer.flush();
+//        }
+//        catch(IOException ex){
+//            System.out.println(ex.getMessage());
+//        }
+
+
+
     }
 
     @Override
