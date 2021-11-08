@@ -1049,10 +1049,12 @@ reportTable.setFillParent(true);
                 reportYearsName.setSelected(0);
             }
         });
+
         delReportYes.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
-                try(FileWriter writer = new FileWriter("report.txt", false))
+
+                try(FileWriter writer = new FileWriter( (Gdx.files.external("/.prefs/Library/report.txt")).file(), false))
                 {
                     writer.write( "");
                     writer.flush();
@@ -1060,14 +1062,14 @@ reportTable.setFillParent(true);
                 catch(IOException ex){
                     System.out.println(ex.getMessage());
                 }
-                try(FileWriter writer = new FileWriter("reportGiverBook.txt", false))
+                try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).file(), false))
                 {
                     writer.write( "");
                     writer.flush();
                 }
                 catch(IOException ex){
                     System.out.println(ex.getMessage());
-                }try(FileWriter writer = new FileWriter("reportOnName.txt", false))
+                }try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnName.txt")).file(), false))
                 {
                     writer.write( "");
                     writer.flush();
@@ -1169,14 +1171,14 @@ reportTable.setFillParent(true);
 
                     if (Objects.equals(reportString.getText(), "")){
                         try {
-                            Gdx.files.internal("reportGiverBook.txt").copyTo( Gdx.files.external("/Downloads/отчет о выдачи книг.txt"));
+                            Gdx.files.internal("reportGiverBook.txt").copyTo( Gdx.files.external("/Downloads/отчет о выдаче книг.txt"));
                         }catch (Exception e){
                             // TODO: 07.11.2021 добавить ошибку
                         }
 
                     }else {  if ( Gdx.files.absolute(reportString.getText()).exists()){
                         try {
-                            Gdx.files.internal("reportGiverBook.txt").copyTo( Gdx.files.absolute( reportString.getText()+"/отчет о выдачи книг.txt"));
+                            Gdx.files.internal("reportGiverBook.txt").copyTo( Gdx.files.absolute( reportString.getText()+"/отчет о выдаче книг.txt"));
                         }catch (Exception e){
                             // TODO: 07.11.2021 добавить ошибку
                         } }else { // TODO: 07.11.2021 добавить ошибку
@@ -1190,7 +1192,7 @@ reportTable.setFillParent(true);
             public void changed(ChangeEvent changeEvent, Actor actor) {
                if (reportOnNameOn){
                 reportName=reportNameName.getSelected()+" "+(reportYearsName.getSelectedIndex()+1)+" "+reportCharName.getSelected();
-                   try(FileWriter writer = new FileWriter("reportOnName.txt", false
+                   try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnName.txt")).file(), false
 
                    ))
                    {     writer.write("");
@@ -1203,7 +1205,7 @@ reportTable.setFillParent(true);
                 try(FileReader reader = new FileReader("report.txt"))
                 {
 
-                    try(FileWriter writer = new FileWriter("reportOnName.txt", true
+                    try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnName.txt")).file(), true
 
                     ))
                     {
@@ -1497,7 +1499,7 @@ stage.addActor(readersOnReportMenuTable);
     }
 
     public void logNewString(String str){
-        try(FileWriter writer = new FileWriter("report.txt", true))
+        try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/report.txt")).file(), true))
         {
             writer.write(str);
             writer.append('\n');
@@ -1506,8 +1508,8 @@ stage.addActor(readersOnReportMenuTable);
         catch(IOException ex){
             System.out.println(ex.getMessage());
         }
-        if (str.contains("выданна")||str.contains("вернул")){
-            try(FileWriter writer = new FileWriter("reportGiverBook.txt", true))
+        if (str.contains("выдана")||str.contains("вернул")){
+            try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).file(), true))
             {
                 writer.write(str);
                 writer.append('\n');
@@ -2483,7 +2485,7 @@ if ((bookArrayList.get(i).name.length()<20)||(Objects.equals(bookArrayList.get(i
                                                 (int) (classOfReadersOnGivMenuSelectBox.getSelectedIndex() + 1))) {
                                     book.giveBook(value);
 
-                                    logNewString((new GregorianCalendar()).getTime()+" книга:"+book.author+" "+book.name+" выданна "+value.surname + " " + value.name+  " " + value.yearsLern +" " + value.charClass);
+                                    logNewString((new GregorianCalendar()).getTime()+" книга:"+book.author+" "+book.name+" выдана "+value.surname + " " + value.name+  " " + value.yearsLern +" " + value.charClass);
                                     Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
                                             , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
 
