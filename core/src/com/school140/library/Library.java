@@ -112,7 +112,7 @@ Boolean save=true;
         Screen.bookOnHendNumberInt = pref.getInteger("bookOnHendNumberInt");
         Screen.numberOfBook = pref.getInteger("bookNumber");
         Screen.bookNumberOfHend = pref.getInteger("bookNumberOfHend");
-
+Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
 
         if (((new GregorianCalendar()).getTime().getMonth() > 5) && ((new GregorianCalendar()).getTime().getMonth() < 9)) {
             if (screen.dataOfNewClass.getTimeInMillis() + 3.156e+10 < (new GregorianCalendar()).getTimeInMillis()) {
@@ -196,6 +196,22 @@ Boolean save=true;
         saveAll();
 
 
+        Gdx.files.external("/.prefs/Library").mkdirs();
+        try(FileWriter writer = new FileWriter( (Gdx.files.external("/.prefs/Library/report.txt")).file(), true))
+        {
+            writer.write( "");
+            writer.flush();
+        }
+        catch(IOException ex){
+            System.out.println(ex.getMessage());
+        } try(FileWriter writer = new FileWriter( (Gdx.files.external("/.prefs/Library/report.txt")).file(), true))
+        {
+            writer.write( "");
+            writer.flush();
+        }
+        catch(IOException ex){
+            System.out.println(ex.getMessage());
+        }
 
 
 

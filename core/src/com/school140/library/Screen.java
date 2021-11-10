@@ -194,6 +194,9 @@ public class Screen {
     TextButton bookAdded;
     static Skin skin;
     Table reportTable=new Table();
+    Table allALLBookScrollPaneTable=new Table();
+    Table allALLBookOnHandScrollPaneTable=new Table();
+    Table allALLBookOnLibraryScrollPaneTable=new Table();
     static String coverBook;
     static ArrayList<Book> bookArrayList = new ArrayList<>();
     static ArrayList<Readers> readersArrayList = new ArrayList<>();
@@ -230,6 +233,17 @@ public class Screen {
         redactMenu();
         newSerchMenu();
         stage.addActor(mainMenuTable);
+
+        setAllAllBookScrollPaneUpdate();
+
+    }
+
+
+    public void setAllAllBookScrollPaneUpdate(){
+        allBookListUpdate();
+
+        allALLBookScrollPaneTable=tableListAllBook;
+
 
     }
 
@@ -333,7 +347,7 @@ public class Screen {
                 deleteTable.setPosition(740, 180);
                 deleteTable.add(redactButton).pad(2).row();
                 deleteTable.add(deleteButton);
-
+setAllAllBookScrollPaneUpdate();
             }
         });
 
@@ -587,6 +601,7 @@ public class Screen {
                             infoMenuTip = 2;
                             meinMenuUsed();
                             allReaderListUpdate();
+
                             readerNumber.setText(" " + readersArrayList.size());
                             stage.addActor(deleteTable);
                         } else {
@@ -619,7 +634,7 @@ public class Screen {
                                     stage.addActor(readerThisBookTable);
                                     stage.addActor(descriptionInfoTable);
                                     stage.addActor(infoMenuTable);
-
+                                    setAllAllBookScrollPaneUpdate();
                                     infoMenuTip = 1;
                                     stage.addActor(deleteTable);
                                     Collections.sort(bookArrayList, new Comparator<Book>() {
@@ -754,7 +769,6 @@ public class Screen {
         genreWindow = new TextField(" Жанр", skinTree);
         genreWindow.setDisabled(true);
         descriptionWindow = new Label(" Описание", skin);
-
         nameBookWindow = new TextField(" Название", skinTree);
         nameBookWindow.setDisabled(true);
         infoMenuTable.add(nameBookWindowPreName).fill(1.1f, 1).pad(2, 0, 2, 65);
@@ -859,8 +873,11 @@ public class Screen {
                             imageWindow = new Texture(Gdx.files.internal(bookArrayList.get(index).coverBook));
                             genreWindow.setText(" " + bookArrayList.get(index).genre);
 
-
-                            descriptionWindow.setText(bookArrayList.get(index).description);
+if (bookArrayList.get(index).description.equals("")){
+                                descriptionWindow.setText(" Описание");
+                            }else{
+                                descriptionWindow.setText(bookArrayList.get(index).description);
+                            }
                             nameBookWindow.setText(" " + bookArrayList.get(index).name);
 
 
@@ -1047,6 +1064,8 @@ reportTable.setFillParent(true);
                 reportCharName.setSelected(0);
                 reportNameName.setSelected(0);
                 reportYearsName.setSelected(0);
+                reportString.setMessageText(" путь до отчета(по умолчанию загрузки)");
+                reportString.setColor(Color.WHITE);
             }
         });
 
@@ -1090,6 +1109,8 @@ reportTable.setFillParent(true);
                 reportCharName.setSelected(0);
                 reportNameName.setSelected(0);
                 reportYearsName.setSelected(0);
+                reportString.setMessageText(" путь до отчета(по умолчанию загрузки)");
+                reportString.setColor(Color.WHITE);
             }
         });
 
@@ -1148,17 +1169,19 @@ reportTable.setFillParent(true);
 
                     if (Objects.equals(reportString.getText(), "")){
                         try {
-                            Gdx.files.internal("report.txt").copyTo( Gdx.files.external("/Downloads/отчет.txt"));
+                            (Gdx.files.external("/.prefs/Library/report.txt")).copyTo( Gdx.files.external("/Downloads/отчет.txt"));
                         }catch (Exception e){
-                            // TODO: 07.11.2021 добавить ошибку
+
                         }
 
                     }else {     if ( Gdx.files.absolute(reportString.getText()).exists()){
                         try {
-                            Gdx.files.internal("report.txt").copyTo( Gdx.files.absolute( reportString.getText()+"/отчет.txt"));
+                            (Gdx.files.external("/.prefs/Library/report.txt")).copyTo( Gdx.files.absolute( reportString.getText()+"/отчет.txt"));
                         }catch (Exception e){
-                            // TODO: 07.11.2021 добавить ошибку
-                        } }else { // TODO: 07.11.2021 добавить ошибку
+
+                        } }else { reportString.setText(null);
+                        reportString.setMessageText("такого пути не существует");
+                        reportString.setColor(Color.RED);
                     }
                     }
 
@@ -1171,17 +1194,19 @@ reportTable.setFillParent(true);
 
                     if (Objects.equals(reportString.getText(), "")){
                         try {
-                            Gdx.files.internal("reportGiverBook.txt").copyTo( Gdx.files.external("/Downloads/отчет о выдаче книг.txt"));
+                            (Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).copyTo( Gdx.files.external("/Downloads/отчет о выдаче книг.txt"));
                         }catch (Exception e){
-                            // TODO: 07.11.2021 добавить ошибку
+
                         }
 
                     }else {  if ( Gdx.files.absolute(reportString.getText()).exists()){
                         try {
-                            Gdx.files.internal("reportGiverBook.txt").copyTo( Gdx.files.absolute( reportString.getText()+"/отчет о выдаче книг.txt"));
+                            (Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).copyTo( Gdx.files.absolute( reportString.getText()+"/отчет о выдаче книг.txt"));
                         }catch (Exception e){
-                            // TODO: 07.11.2021 добавить ошибку
-                        } }else { // TODO: 07.11.2021 добавить ошибку
+
+                        } }else { reportString.setText(null);
+                        reportString.setMessageText("такого пути не существует");
+                        reportString.setColor(Color.RED);
                     }
                     }
 
@@ -1202,7 +1227,7 @@ reportTable.setFillParent(true);
 
                        System.out.println(ex.getMessage());
                    }
-                try(FileReader reader = new FileReader("report.txt"))
+                try(FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file()))
                 {
 
                     try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnName.txt")).file(), true
@@ -1236,17 +1261,19 @@ reportTable.setFillParent(true);
 
                             if (Objects.equals(reportString.getText(), "")){
                                 try {
-                                    Gdx.files.internal("reportOnName.txt").copyTo( Gdx.files.external("/Downloads/отчет"+reportName+".txt"));
+                                    (Gdx.files.external("/.prefs/Library/reportOnName.txt")).copyTo( Gdx.files.external("/Downloads/отчет "+reportName+".txt"));
                                 }catch (Exception e){
-                                    // TODO: 07.11.2021 добавить ошибку
+
                                 }
 
                             }else {   if ( Gdx.files.absolute(reportString.getText()).exists()){
                                 try {
-                                    Gdx.files.internal("reportOnName.txt").copyTo( Gdx.files.absolute( reportString.getText()+"/отчет"+reportName+".txt"));
+                                    (Gdx.files.external("/.prefs/Library/reportOnName.txt")).copyTo( Gdx.files.absolute( reportString.getText()+"/отчет "+reportName+".txt"));
                                 }catch (Exception e){
-                                    // TODO: 07.11.2021 добавить ошибку
-                                }}else { // TODO: 07.11.2021 добавить ошибку
+
+                                }}else { reportString.setText(null);
+                                reportString.setMessageText("такого пути не существует");
+                                reportString.setColor(Color.RED);
                             }
                             }
 
@@ -1271,8 +1298,7 @@ reportNull.addListener(new ChangeListener() {
        stage.addActor(delReportTable);
     }
 });
-
-        exit.addListener(new ChangeListener() {
+   exit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.exit();
@@ -1294,6 +1320,8 @@ stage.addActor(readersOnReportMenuTable);
                 reportCharName.setSelected(0);
                         reportNameName.setSelected(0);
                 reportYearsName.setSelected(0);
+                reportString.setMessageText(" путь до отчета(по умолчанию загрузки)");
+                reportString.setColor(Color.WHITE);
 
             }
         });
@@ -1380,6 +1408,10 @@ stage.addActor(readersOnReportMenuTable);
                 stage.addActor(tableListAllBook);
                 stage.addActor(numberAllBookTable);
 
+
+                    stage.addActor(tableListAllBook);
+
+
                 stage.addActor(descriptionInfoTable);
                 stage.addActor(infoMenuTable);
                 getAuthorForSearch();
@@ -1428,15 +1460,21 @@ stage.addActor(readersOnReportMenuTable);
 
                 stage.clear();
                 stage.addActor(mainMenuTable);
-                stage.addActor(tableListAllBook);
+
+                if (authorSearch.getSelectedIndex()==0&&nameBookSearch.getText().equals("")&&genreSearch.getSelectedIndex()==0){
+                    stage.addActor(allALLBookScrollPaneTable);
+                }else {
+                    stage.addActor(tableListAllBook);
+                    allBookListUpdate();
+                }
                 stage.addActor(numberAllBookTable);
                 stage.addActor(readerThisBookTable);
-                descriptionWindow.setText("Описание");
+                descriptionWindow.setText(" Описание");
                 stage.addActor(descriptionInfoTable);
                 stage.addActor(infoMenuTable);
                 infoMenuTip = 1;
                 stage.addActor(deleteTable);
-                allBookListUpdate();
+
                 meinMenuUsed();
                 getAuthorForSearch();
                 bookMenuTipNow = 0;
@@ -1670,19 +1708,21 @@ stage.addActor(readersOnReportMenuTable);
                             descriptionString += "\n";
                         }
                     }
+
+                    logNewString((new GregorianCalendar()).getTime()+" новая книга "+nameBook.getText()+" "+
+                            author.getText()+" "+genre.getSelected()+" в количестве"+Integer.parseInt(number.getText())+" штук");
                     for (int i = 0; i < Integer.parseInt(number.getText()); i++) {
                         bookArrayList.add(new Book(nameBook.getText(), author.getText(),
                                 (String) genre.getSelected(), descriptionString, coverBook));
 
-                        logNewString((new GregorianCalendar()).getTime()+" новая книга "+nameBook.getText()+" "+
-                                author.getText()+" "+genre.getSelected());
+
 
                         Library.saveNewBook(nameBook.getText(), author.getText(),
                                 descriptionString, (String) genre.getSelected(), coverBook);
 
                     }
 
-
+setAllAllBookScrollPaneUpdate();
                     stage.clear();
                     meinMenuUsed();
                     stage.addActor(mainMenuTable);
@@ -1896,6 +1936,8 @@ if ((bookArrayList.get(i).name.length()<20)||(Objects.equals(bookArrayList.get(i
                 return o1.author.compareTo(o2.author);
             }
         });
+
+
 
 
         allBookScrollPaneTable.clear();
@@ -2416,12 +2458,20 @@ if ((bookArrayList.get(i).name.length()<20)||(Objects.equals(bookArrayList.get(i
                     if (charClass.getText().equals("")) {
                         readersArrayList.add(new Readers(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, "a"));
                         Library.saveNewReader(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, "a");
+                      if(classReader.getSelectedIndex()>10){
+                          logNewString((new GregorianCalendar()).getTime()+" новая персона "+nameReader.getText()+" "+ surnameReader.getText()+" "+patronymicReader.getText()+" сотрудник");
+
+                      }else {
                         logNewString((new GregorianCalendar()).getTime()+" новая персона "+nameReader.getText()+" "+ surnameReader.getText()+" "+patronymicReader.getText()+" "+ classReader.getSelectedIndex() + 1+" "+ "a");
-                    } else
+                    } }else
                         readersArrayList.add(new Readers(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, charClass.getText()));
                     Library.saveNewReader(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, charClass.getText());
-                    logNewString((new GregorianCalendar()).getTime()+" новая персона "+nameReader.getText()+" "+ surnameReader.getText()+" "+patronymicReader.getText()+" "+ classReader.getSelectedIndex() + 1+" "+ charClass.getText());
+                    if(classReader.getSelectedIndex()>10){
+                        logNewString((new GregorianCalendar()).getTime() + " новая персона " + nameReader.getText() + " " + surnameReader.getText() + " " + patronymicReader.getText() + " сотрудник");
 
+                    }else {
+                        logNewString((new GregorianCalendar()).getTime() + " новая персона " + nameReader.getText() + " " + surnameReader.getText() + " " + patronymicReader.getText() + " " + classReader.getSelectedIndex() + 1 + " " + charClass.getText());
+                    }
                     newReaderTable.clear();
                     newReaderTable.add(surnameReader).size(350, 30).pad(2).row();
                     newReaderTable.add(nameReader).size(350, 30).pad(2).row();
@@ -2484,8 +2534,14 @@ if ((bookArrayList.get(i).name.length()<20)||(Objects.equals(bookArrayList.get(i
                                                 (String) charClassGivMenu.getSelected() +
                                                 (int) (classOfReadersOnGivMenuSelectBox.getSelectedIndex() + 1))) {
                                     book.giveBook(value);
+                                    if(classReader.getSelectedIndex()>10){
+                                        logNewString((new GregorianCalendar()).getTime()+" книга:"+book.author+" "+book.name+" выдана "+value.surname + " " + value.name+  " сотрудник" );
 
-                                    logNewString((new GregorianCalendar()).getTime()+" книга:"+book.author+" "+book.name+" выдана "+value.surname + " " + value.name+  " " + value.yearsLern +" " + value.charClass);
+                                    }else {
+                                        logNewString((new GregorianCalendar()).getTime()+" книга:"+book.author+" "+book.name+" выдана "+value.surname + " " + value.name+  " " + value.yearsLern +" " + value.charClass);
+
+                                    }
+
                                     Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
                                             , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
 
@@ -2783,7 +2839,14 @@ if ((bookArrayList.get(i).name.length()<20)||(Objects.equals(bookArrayList.get(i
                         for (Book book : bookArrayList) {
 
                             if ((((book.author + " " + book.name).equals(bookOnReturnMenuSelectBox.getSelected()))) && (book.giveThisReader(reader))) {
-                                logNewString((new GregorianCalendar()).getTime()+"книгу: "+book.author+" "+book.name+" вернул "+reader.surname+" "+reader.name+" "+reader.yearsLern+" "+reader.charClass);
+
+                                if(reader.yearsLern>10){
+                                    logNewString((new GregorianCalendar()).getTime() + " книгу:" + book.author + " " + book.name + " вернул " + reader.surname + " " + reader.name + " сотрудник");
+
+                                }else {
+                                    logNewString((new GregorianCalendar()).getTime() + " книгу:" + book.author + " " + book.name + " вернул " + reader.surname + " " + reader.name + " " + reader.yearsLern + " " + reader.charClass);
+                                }
+
                                 stage.clear();
                                 meinMenuUsed();
                                 stage.addActor(mainMenuTable);
