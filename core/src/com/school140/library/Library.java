@@ -25,7 +25,7 @@ Boolean save=true;
     Texture background;
     Texture logo;
     static Preferences pref;
-    Preferences prefBackup;
+    static Preferences prefBackup;
     private int timerResize = 0;
 
     @Override
@@ -197,6 +197,7 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
 
 
         Gdx.files.external("/.prefs/Library").mkdirs();
+        Gdx.files.external("/.prefs/Library/cover").mkdirs();
         try(FileWriter writer = new FileWriter( (Gdx.files.external("/.prefs/Library/report.txt")).file(), true))
         {
             writer.write( "");
@@ -212,6 +213,7 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
         catch(IOException ex){
             System.out.println(ex.getMessage());
         }
+
 
 
 
@@ -236,13 +238,13 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
             timerResize--;
         }
 
-if ((new GregorianCalendar()).getTime().getHours()%8==0){
+if ((new GregorianCalendar()).getTime().getHours()%2==0){
 if (save){
     saveAll();
     save=false;
 }
 
-}else if ((new GregorianCalendar()).getTime().getHours()%8==1){
+}else if ((new GregorianCalendar()).getTime().getHours()%2==1){
     if (!save){
         save=true;
     }
@@ -418,6 +420,49 @@ if (save){
 
 
         pref.flush();
+
+
+
+
+        for (int i = 0; i < Screen.bookArrayList.size(); i++) {
+            prefBackup.putString("bookName" + i, Screen.bookArrayList.get(i).name);
+            prefBackup.putString("bookAuthor" + i, Screen.bookArrayList.get(i).author);
+            prefBackup.putString("bookDescription" + i, Screen.bookArrayList.get(i).description);
+            prefBackup.putString("bookGenre" + i, Screen.bookArrayList.get(i).genre);
+            prefBackup.putBoolean("bookGiven" + i, (Screen.bookArrayList.get(i).reader != null));
+            prefBackup.putString("bookCover" + i, (Screen.bookArrayList.get(i).coverBook));
+            if (Screen.bookArrayList.get(i).reader != null) {
+                prefBackup.putInteger("bookReaderDateYear" + i, Screen.bookArrayList.get(i).dataOfGiven.getWeekYear());
+                prefBackup.putInteger("bookReaderDateMount" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getMonth());
+                prefBackup.putInteger("bookReaderDateDay" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getDate());
+
+                prefBackup.putString("bookReaderName" + i, Screen.bookArrayList.get(i).reader.name);
+                prefBackup.putString("bookReaderSurname" + i, Screen.bookArrayList.get(i).reader.surname);
+                prefBackup.putString("bookReaderPatronymic" + i, Screen.bookArrayList.get(i).reader.patronymic);
+                prefBackup.putInteger("bookReaderYearsLern" + i, Screen.bookArrayList.get(i).reader.yearsLern);
+                prefBackup.putString("bookReaderCharClass" + i, Screen.bookArrayList.get(i).reader.charClass);
+            }
+        }
+        prefBackup.putInteger("readerLength", Screen.readersArrayList.size());
+        for (int i = 0; i < Screen.readersArrayList.size(); i++) {
+            prefBackup.putString("name" + i, Screen.readersArrayList.get(i).name);
+            prefBackup.putString("surname" + i, Screen.readersArrayList.get(i).surname);
+            prefBackup.putString("patronymic" + i, Screen.readersArrayList.get(i).patronymic);
+            prefBackup.putInteger("yearsLern" + i, Screen.readersArrayList.get(i).yearsLern);
+            prefBackup.putString("charClass" + i, Screen.readersArrayList.get(i).charClass);
+        }
+        prefBackup.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
+        prefBackup.putInteger("bookNumber", Screen.numberOfBook);
+        prefBackup.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
+        prefBackup.putInteger("dataOfNewClassDay", screen.dataOfNewClass.getTime().getDate());
+        prefBackup.putInteger("dataOfNewClassMount", screen.dataOfNewClass.getTime().getMonth());
+        prefBackup.putInteger("dataOfNewClassYear", screen.dataOfNewClass.getWeekYear());
+        prefBackup.flush();
+
+
+
+
+
     }
 
     ;
