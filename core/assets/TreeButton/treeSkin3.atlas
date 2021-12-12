@@ -1,0 +1,104 @@
+
+treeSkin3.png
+size: 1024, 1024
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+,k
+  rotate: false
+  xy: 40, 40
+  size: 40, 40
+  orig: 40, 40
+  offset: 0, 0
+  index: -1
+d
+  rotate: false
+  xy: 331, 706
+  size: 152, 52
+  orig: 152, 52
+  offset: 0, 0
+  index: -1
+fffff
+  rotate: false
+  xy: 40, 544
+  size: 155, 51
+  orig: 155, 51
+  offset: 0, 0
+  index: -1
+i
+  rotate: false
+  xy: 795, 846
+  size: 128, 44
+  orig: 128, 44
+  offset: 0, 0
+  index: -1
+sssss
+  rotate: false
+  xy: 160, 190
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
+ycursory
+  rotate: false
+  xy: 160, 58
+  size: 2, 52
+  orig: 2, 52
+  offset: 0, 0
+  index: -1
+yyd
+  rotate: false
+  xy: 331, 838
+  size: 152, 52
+  orig: 152, 52
+  offset: 0, 0
+  index: -1
+yyyRTFRyyyyyyyyyyy
+  rotate: false
+  xy: 563, 838
+  size: 152, 52
+  orig: 152, 52
+  offset: 0, 0
+  index: -1
+yyyy
+  rotate: false
+  xy: 40, 160
+  size: 40, 40
+  orig: 40, 40
+  offset: 0, 0
+  index: -1
+yyyyy..yyyyyyyyy
+  rotate: false
+  xy: 275, 543
+  size: 2, 52
+  orig: 2, 52
+  offset: 0, 0
+  index: -1
+yyyyyyyyyyyiiyyy
+  rotate: false
+  xy: 40, 280
+  size: 152, 52
+  orig: 152, 52
+  offset: 0, 0
+  index: -1
+yyyyyyyyyyyyyy
+  rotate: false
+  xy: 40, 412
+  size: 152, 52
+  orig: 152, 52
+  offset: 0, 0
+  index: -1
+yyyyyyyyyyyyyyy
+  rotate: false
+  xy: 563, 711
+  size: 149, 47
+  orig: 149, 47
+  offset: 0, 0
+  index: -1
+Unnamed
+  rotate: false
+  xy: 40, 675
+  size: 211, 215
+  orig: 211, 215
+  offset: 0, 0
+  index: -1

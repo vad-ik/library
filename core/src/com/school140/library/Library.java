@@ -23,7 +23,7 @@ public class Library extends ApplicationAdapter {
 Boolean save=true;
     Random random;
     Texture background;
-    Texture logo;
+    Texture logo ;
     static Preferences pref;
     static Preferences prefBackup;
     private int timerResize = 0;
@@ -213,24 +213,7 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
         catch(IOException ex){
             System.out.println(ex.getMessage());
         }
-
-
-
-
-//        try(FileWriter writer = new FileWriter("Log.txt", true))
-//        {
-//            // запись всей строки
-//            String text = "Hello Gold!";
-//            writer.write(text);
-//            writer.flush();
-//        }
-//        catch(IOException ex){
-//            System.out.println(ex.getMessage());
-//        }
-
-
-
-    }
+   }
 
     @Override
     public void render() {
@@ -298,8 +281,8 @@ if (save){
 
             Screen.stage.getViewport().update(width, height, true);
 
-            screen.mainMenuTable.setPosition(0, Gdx.graphics.getHeight() / 2 - Screen.newBook.getHeight() - 8);
-            Screen.infoMenuTable.setPosition(Gdx.graphics.getWidth() / 4 * 3, Gdx.graphics.getHeight() / 3 + Screen.nameBookWindowPreName.getHeight());
+            screen.mainMenuTable.setPosition(0, Gdx.graphics.getHeight() / 2 - Screen.newBook.getHeight() - 16);
+            Screen.infoMenuTable.setPosition(Gdx.graphics.getWidth() / 4 * 3-14, Gdx.graphics.getHeight() / 3 + Screen.nameBookWindow.getHeight());
             screen.tableListAllBook.clear();
             screen.allBookScrollPane.setScrollingDisabled(true, false);
             screen.tableListAllBook.add(screen.allBookScrollPane)
@@ -318,7 +301,7 @@ if (save){
             screen.erorTextField.setPosition(Gdx.graphics.getWidth() / 2 - screen.erorTextField.getWidth() / 2, 20);
             Screen.descriptionInfoTable.clear();
             Screen.descriptionInfoTable.add(screen.descriptionScrollPane).size(Gdx.graphics.getWidth() / 3 - 20, Gdx.graphics.getHeight() / 5);
-            Screen.descriptionInfoTable.setPosition(Gdx.graphics.getWidth() / 4 * 3 + 80, Gdx.graphics.getHeight() / 3 + Screen.nameBookWindowPreName.getHeight() - 3 * Screen.numberBookOfHendWindow.getHeight() - Gdx.graphics.getHeight() / 10);
+            Screen.descriptionInfoTable.setPosition(Gdx.graphics.getWidth() / 4 * 3 + 80, Gdx.graphics.getHeight() / 3 + Screen.nameBookWindow.getHeight() - 3 * Screen.numberBookOfHendWindow.getHeight() - Gdx.graphics.getHeight() / 10);
             Screen.numberAllBookTable.setPosition(2 * Screen.numberAllBook.getWidth() + 36
                     , Screen.numberAllBook.getHeight() + 10);
             screen.addNewBookTable.setPosition(0, -5 * Screen.nameBook.getHeight() + 50);

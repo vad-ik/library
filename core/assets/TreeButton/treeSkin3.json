@@ -1,0 +1,95 @@
+{
+"com.badlogic.gdx.graphics.g2d.BitmapFont": {
+	"Unnamed": {
+		"file": "Unnamed.fnt"
+	}
+},
+"com.badlogic.gdx.graphics.Color": {
+	"RGBA_0_0_0_255": {
+		"r": 0,
+		"g": 0,
+		"b": 0,
+		"a": 1
+	},
+	"RGBA_119_119_119_255": {
+		"r": 0.46666667,
+		"g": 0.46666667,
+		"b": 0.46666667,
+		"a": 1
+	},
+
+	"RGBA_220_20_60_255": {
+		"r": 0.86,
+		"g": 0.07,
+		"b": 0.23,
+		"a": 1
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
+	"default": {
+		"font": "Unnamed"
+	},
+
+},
+"com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle": {
+	"default": {
+		"font": "Unnamed",
+		"fontColorSelected": "RGBA_0_0_0_255",
+		"fontColorUnselected": "RGBA_119_119_119_255",
+		"selection": ",k"
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle": {
+	"default": {
+		"background": "i",
+		"vScrollKnob": "sssss"
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle": {
+	"default": {
+		"font": "Unnamed",
+		"fontColor": "RGBA_0_0_0_255",
+		"overFontColor": "RGBA_0_0_0_255",
+		"disabledFontColor": "RGBA_119_119_119_255",
+		"background": "yyyyyyyyyyyiiyyy",
+		"scrollStyle": "default",
+		"listStyle": "default"
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
+	"default": {
+		"font": "Unnamed",
+		"fontColor": "RGBA_0_0_0_255",
+		"downFontColor": "RGBA_0_0_0_255",
+		"overFontColor": "RGBA_119_119_119_255",
+		"checkedFontColor": "RGBA_0_0_0_255",
+		"up": "yyyyyyyyyyyyyy",
+		"down": "yyyyyyyyyyyyyyy"
+	},
+	"textbuttonlist": {
+		"font": "Unnamed",
+		"fontColor": "RGBA_119_119_119_255",
+		"downFontColor": "RGBA_0_0_0_255",
+		"overFontColor": "RGBA_119_119_119_255",
+		"focusedFontColor": "RGBA_119_119_119_255",
+		"up": "yyd",
+		"down": "d"
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle": {
+	"default": {
+		"font": "Unnamed",
+		"fontColor": "RGBA_0_0_0_255",
+		"background": "fffff",
+		"cursor": "ycursory",
+		"selection": "yyyyy..yyyyyyyyy"
+	}
+
+
+},
+"com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle": {
+	"default": {
+		"label": "default"
+	}
+}
+}
