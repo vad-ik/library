@@ -8,11 +8,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Objects;
 import java.util.Random;
 
 public class Library extends ApplicationAdapter {
@@ -30,6 +29,7 @@ Boolean save=true;
 
     @Override
     public void create() {
+
         pref = Gdx.app.getPreferences("LibrarySave");
 
         prefBackup = Gdx.app.getPreferences("LibrarySaveBackup");
@@ -39,9 +39,8 @@ Boolean save=true;
 
         }
 
-
         random = new Random();
-        background = new Texture("background" + (random.nextInt(3) + 1) + ".png");
+        background = new Texture("TreeButton/background" + (random.nextInt(3) + 1) + ".png");
 
         batch = new SpriteBatch();
         allBook = 0;
@@ -501,7 +500,7 @@ if (save){
         batch.dispose();
         Screen.stage.dispose();
         Screen.imageWindow.dispose();
-        Screen.skin.dispose();
+        Screen.skinTree.dispose();
         Screen.skinTree.dispose();
 
 

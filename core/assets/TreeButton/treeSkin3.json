@@ -28,7 +28,9 @@
 "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
 	"default": {
 		"font": "Unnamed"
-	},
+	},"red": {
+		"font": "Unnamed"
+	}
 
 },
 "com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle": {
@@ -74,6 +76,12 @@
 		"focusedFontColor": "RGBA_119_119_119_255",
 		"up": "yyd",
 		"down": "d"
+	}
+},
+	"com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
+	"default": {
+		"font": "Unnamed",
+		"fontColor": "RGBA_119_119_119_255"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle": {

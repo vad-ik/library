@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -18,7 +17,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+// TODO: 09.02.2022  при нажатии на книгу считывается ее название (button name) являюшийся id
+
 public class Screen {
+    boolean bookDetected;
     String nameNewBookButton;
     static Skin skinTree;
     Array<String> charOfClassArray = new Array<>();
@@ -32,6 +34,7 @@ public class Screen {
     List allReaderList;
     Label saveError;
     String reportName;
+    boolean errorRedact=false;
     SelectBox reportYearsName;
     SelectBox reportCharName;
     SelectBox reportNameName;
@@ -144,6 +147,7 @@ public class Screen {
     TextField surnameReaderSearch;
     static Table giveBookButtonTable = new Table();
     static TextButton giveBookButton;
+    static TextButton giveBookKlassButton;
     TextButton deleteButton;
     Table deleteTable = new Table();
     static Boolean chooseObject = false;
@@ -190,7 +194,6 @@ public class Screen {
     TextButton redactButton;
     TextField description;
     TextButton bookAdded;
-    static Skin skin;
     Table reportTable = new Table();
     static String coverBook;
     static ArrayList<Book> bookArrayList = new ArrayList<>();
@@ -219,7 +222,6 @@ public class Screen {
         Gdx.input.setInputProcessor(stage);
 
         skinTree = new Skin(Gdx.files.internal("TreeButton/treeSkin3.json"));
-        skin = new Skin(Gdx.files.internal("default/skin/uiskin.json"));
 
 
         meinMenu();
@@ -237,7 +239,6 @@ public class Screen {
 
     }
 
-    // TODO: 12.12.2021 название/фио должно иметь хотябы одну букву/ цифру
     private void redactMenu() {
         redactBook.setFillParent(true);
         numberBookRedact = new TextField("", skinTree);
@@ -267,9 +268,10 @@ public class Screen {
                 intNormRedact=true;
                 try {
                     Integer.parseInt(numberBookRedact.getText());
-                    if (  Integer.parseInt(numberBookRedact.getText())<0){
+                    if (  Integer.parseInt(numberBookRedact.getText())<0|| Integer.parseInt(numberBookRedact.getText())>1000){
                         Integer.parseInt("i");
-                    }
+
+                }
                 }catch (NumberFormatException e){
                   intNormRedact=false;
                 }
@@ -303,7 +305,13 @@ public class Screen {
                             }
                         }
                     }
+                    errorRedact=false;
+if (numberRedactMinusBook!=numberThisBook-Integer.parseInt(numberBookRedact.getText())){
+    errorDelLabel.setText(" Не все книги были удалены, \n часть из них выданна");
 
+
+    errorRedact=true;
+}
                 }
                 coverReal = true;
                 try {
@@ -352,6 +360,9 @@ public class Screen {
                 stage.addActor(tableListAllBook);
                 stage.addActor(numberAllBookTable);
                 stage.addActor(readerThisBookTable);
+                if (errorRedact){
+                    stage.addActor(errorDelTable);
+                }
                 descriptionWindow.setText("Описание");
                 stage.addActor(descriptionInfoTable);
                 stage.addActor(infoMenuTable);
@@ -522,14 +533,23 @@ public class Screen {
 
         charForSerch.clear();
         charForSerch.add(" Все буквы");
+       
+
+
+
         for (Readers reader : readersArrayList) {
             if (
                     ((reader.name.contains(nameReaderSearch.getText())) || (nameReaderSearch.getText().equals(""))) &&
                             ((reader.surname.contains(surnameReaderSearch.getText())) || (surnameReaderSearch.getText().equals(""))) &&
-                            ((reader.yearsLern == yearsSearch.getSelectedIndex() + 1) || (yearsSearch.getSelectedIndex() == 0))
+                            ((reader.yearsLern == yearsSearch.getSelectedIndex()) || (yearsSearch.getSelectedIndex() == 0))
+
             ) {
+
                 if (!charForSerch.contains(reader.charClass, false)) {
-                    if(reader.yearsLern!=13){
+                    if(reader.yearsLern<12){
+
+
+
                         charForSerch.add(reader.charClass);
                     }
                 }
@@ -607,9 +627,9 @@ if (bookMenuTipNow==2&&book.reader!=null){
 
 
         deleteButton = new TextButton("Удалить", skinTree);
-        errorDelLabel = new Label("все книги выданы", skin, "red");
+        errorDelLabel = new Label("все книги выданы", skinTree, "red");
 
-        errorDelTable.setPosition(830, 130);
+        errorDelTable.setPosition(850, 130);
         errorDelTable.addActor(errorDelLabel);
 
 
@@ -673,9 +693,15 @@ if (bookMenuTipNow==2&&book.reader!=null){
 
 
                                     try {
-                                        bookArrayList.remove(i);
+
                                         numberOfBook--;
-                                        logNewString((new GregorianCalendar()).getTime() + " книга удалена " + bookArrayList.get(i).author + " " + bookArrayList.get(i).name);
+                                        logNewString(
+                                                (new GregorianCalendar()).getTime()
+                                                        + " книга удалена "
+                                                        + bookArrayList.get(i).author +
+                                                        " " + bookArrayList.get(i).name);
+                                        bookArrayList.remove(i);
+
                                     } catch (NullPointerException e) {
 
                                     }
@@ -712,7 +738,7 @@ if (bookMenuTipNow==2&&book.reader!=null){
 
                             } else {
 
-                                errorDelTable.setPosition(450, 200);
+                                errorDelTable.setPosition(850, 130);
                                 errorDelLabel.setText("все книги выданы");
                                 stage.addActor(errorDelTable);
                             }
@@ -800,7 +826,7 @@ if (bookMenuTipNow==2&&book.reader!=null){
         imageWindow = new Texture(Gdx.files.internal("noimg.png"));
         genreWindow = new TextField(" Жанр: Жанр", skinTree);
         genreWindow.setDisabled(true);
-        descriptionWindow = new Label(" Описание: Описание", skin);
+        descriptionWindow = new Label(" Описание: Описание", skinTree);
         nameBookWindow = new TextField(" Название: Название", skinTree);
         nameBookWindow.setDisabled(true);
         numberBookOfHendWindow = new TextField(" В наличии: 0", skinTree);
@@ -826,7 +852,7 @@ if (bookMenuTipNow==2&&book.reader!=null){
 
     private void allReaderMenu() {
 
-        allReaderList = new List(skin);
+        allReaderList = new List(skinTree);
         allReaderScrollPaneTable.row();
         allReaderScrollPane = new ScrollPane(allReaderScrollPaneTable);
 
@@ -943,7 +969,6 @@ if (bookMenuTipNow==2&&book.reader!=null){
                                             (" Класс: " + readersArrayList.get(index).yearsLern + " " + readersArrayList.get(index).charClass)
                                                     .equals(classReaderWindow.getText())) ||
                                     !(" Отчество: " + readersArrayList.get(index).patronymic).equals(patronymicReaderWindow.getText())) {
-
 
                                 patronymicReaderWindow.setText(" Отчество: " + readersArrayList.get(index).patronymic);
 
@@ -1947,7 +1972,41 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
 
     }
 
-    public void newBookMenu() {
+
+    public boolean  chekNoNormalName(String name){
+        if (
+                name.contains("q")||name.contains("w")||name.contains("e")||name.contains("r")||name.contains("t")||name.contains("y")||
+                        name.contains("u")||name.contains("i")||name.contains("o")||name.contains("p")||name.contains("a")||name.contains("s")||
+                        name.contains("d")||name.contains("f")||name.contains("g")||name.contains("h")||name.contains("j")||name.contains("k")||
+                        name.contains("l")||name.contains("z")||name.contains("x")||name.contains("c")||name.contains("v")||name.contains("b")||
+                        name.contains("n")||name.contains("m")||name.contains("Q")||name.contains("W")||name.contains("E")||name.contains("R")||
+                        name.contains("T")||name.contains("Y")||name.contains("U")||name.contains("I")||name.contains("O")||name.contains("P")||
+                        name.contains("A")||name.contains("S")||name.contains("D")||name.contains("F")||name.contains("G")||name.contains("H")||
+                        name.contains("J")||name.contains("K")||name.contains("L")||name.contains("Z")||name.contains("X")||name.contains("C")||
+                        name.contains("V")||name.contains("B")||name.contains("N")||name.contains("M")||name.contains("Й")||name.contains("Ц")||
+                        name.contains("У")||name.contains("К")||name.contains("Е")||name.contains("Н")||name.contains("Г")||name.contains("Ш")||
+                        name.contains("Щ")||name.contains("З")||name.contains("Х")||name.contains("Ъ")||name.contains("Ф")||name.contains("Ы")||
+                        name.contains("Л")||name.contains("О")||name.contains("Р")||name.contains("П")||name.contains("А")||name.contains("В")||
+                        name.contains("Д")||name.contains("Ж")||name.contains("Э")||name.contains("Ю")||name.contains("Б")||name.contains("Ь")||
+                        name.contains("Я")||name.contains("Ч")||name.contains("С")||name.contains("М")||name.contains("И")||name.contains("Т")||
+                        name.contains("я")||name.contains("б")||name.contains("й")||name.contains("ц")||name.contains("-")||name.contains("1")||
+                        name.contains("ч")||name.contains("ю")||name.contains("ф")||name.contains("у")||name.contains("Ё")||name.contains("2")||
+                        name.contains("с")||name.contains("э")||name.contains("ы")||name.contains("к")||name.contains("ё")||name.contains("3")||
+                        name.contains("м")||name.contains("ж")||name.contains("в")||name.contains("е")||name.contains("ъ")||name.contains("4")||
+                        name.contains("и")||name.contains("д")||name.contains("а")||name.contains("н")||name.contains("х")||name.contains("5")||
+                        name.contains("т")||name.contains("л")||name.contains("п")||name.contains("г")||name.contains("з")||name.contains("6")||
+                        name.contains("ь")||name.contains("о")||name.contains("р")||name.contains("ш")||name.contains("щ")||name.contains("7")||
+                        name.contains("8")||name.contains("9")
+
+        ){
+            return false;
+        }else {
+            return true;
+        }
+
+    }
+
+   public void newBookMenu() {
         newBookTable.setFillParent(true);
         newBookTable.setPosition(0, 50);
         addNewBookTable.setFillParent(true);
@@ -1991,12 +2050,11 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
         pathToImage.setColor(1, 1, 1, 1);
         bookAdded.setColor(1, 1, 1, 1);
 
-        // TODO: 08.12.2021 удаление по количеству
         bookAdded.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
 
-                error = new Label(" ", skin, "red");
+                error = new Label(" ", skinTree, "red");
 
                 nameBook.setColor(1, 1, 1, 1);
                 author.setColor(1, 1, 1, 1);
@@ -2005,6 +2063,13 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 noError = true;
 
                 addNewBookTable.clear();
+                if (chekNoNormalName(nameBook.getText())||chekNoNormalName(author.getText())){
+                    noError = false;
+                    error = new Label("автор или название не имеет букв", skinTree);
+                    addNewBookTable.add(number).pad(0, 0, 0, 50);
+                    addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0).row();
+                    addNewBookTable.add(error).fill().pad(0, 4, 0, 0);
+                }
                 try {
                     Integer.parseInt(number.getText());
                     if (Integer.parseInt(number.getText()) <= 0) {
@@ -2014,7 +2079,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                     number.setText(null);
                     noError = false;
 
-                    error = new Label("Количество должно быть числом", skin);
+                    error = new Label("Количество должно быть числом", skinTree);
                     addNewBookTable.add(number).pad(0, 0, 0, 50);
                     addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0).row();
                     addNewBookTable.add(error).fill().pad(0, 4, 0, 0);
@@ -2032,7 +2097,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                         pathToImage.setText(null);
 
                         noError = false;
-                        error = new Label("Неправильный путь", skin);
+                        error = new Label("Неправильный путь", skinTree);
                         addNewBookTable.add(number).pad(0, 0, 0, 50);
                         addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0).row();
                         addNewBookTable.add(error).fill().pad(0, 4, 0, 0);
@@ -2049,7 +2114,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                     error.clear();
                     addNewBookTable.clear();
                     noError = false;
-                    error = new Label(" Заполните обязательные поля", skin, "red");
+                    error = new Label(" Заполните обязательные поля", skinTree, "red");
 
                     addNewBookTable.add(number).pad(0, 0, 0, 0);
                     addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0).row();
@@ -2061,7 +2126,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                         error.clear();
                         addNewBookTable.clear();
                         noError = false;
-                        error = new Label(" максимум 200 книг за раз", skin, "red");
+                        error = new Label(" максимум 200 книг за раз", skinTree, "red");
 
                         addNewBookTable.add(number).pad(0, 0, 0, 0);
                         addNewBookTable.add(bookAdded).fill().pad(0, 0, 0, 0).row();
@@ -2173,8 +2238,8 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 try {
 
 
-                    if ((book.reader.equals(readersArrayList.get(i))) &&
-                            (book.dataOfGiven.getTimeInMillis() + 1.21e+9 < nowData.getTimeInMillis())
+                    if (((book.reader.equals(readersArrayList.get(i))) &&
+                            (book.dataOfGiven.getTimeInMillis() + 1.21e+9 < nowData.getTimeInMillis())&&(!book.genre.equals(" Учебники")||((book.dataOfGiven.getTimeInMillis() + 5.256e+9 < nowData.getTimeInMillis())&&((nowData.getTime().getMonth()== Calendar.JULY||(nowData.getTime().getMonth()== Calendar.JUNE)||(nowData.getTime().getMonth()== Calendar.AUGUST))))||(book.dataOfGiven.getTimeInMillis() + 2.628e+10 < nowData.getTimeInMillis())))
                     ) {
 
                         if (readersArrayList.get(i).yearsLern >= 12) {
@@ -2670,6 +2735,7 @@ if (!chooseObject) {
         readerThisBook.setItems(readerBookArrey);
     }
 
+    // TODO: 16.01.2022  переделать определение книги с индекса на распарсивоние имени кнопки
     public void allReaderListUpdate() {
         Collections.sort(readersArrayList, new Comparator<Readers>() {
             public int compare(Readers o1, Readers o2) {
@@ -2688,12 +2754,17 @@ if (!chooseObject) {
         for (int i = 0; i < readersArrayList.size(); i++) {
 
 
+
+            if(readersArrayList.get(i).yearsLern>12 ){
+                readersArrayList.get(i).yearsLern=12;
+            };
+
             if (((nameReaderSearch.getText().equals("")) || (readersArrayList.get(i).name.contains(nameReaderSearch.getText())))
                     && ((surnameReaderSearch.getText().equals("")) || (readersArrayList.get(i).surname.contains(surnameReaderSearch.getText())))
                     && ((yearsSearch.getSelectedIndex() == 0) || (((readersArrayList.get(i).yearsLern + " класс").equals(yearsSearch.getSelected()) && (readersArrayList.get(i).yearsLern < 12)) || (((" Сотрудник").equals(yearsSearch.getSelected()))) && (readersArrayList.get(i).yearsLern > 11)))
                     && ((yearsCharSearch.getSelectedIndex() == 0) || (readersArrayList.get(i).charClass.equals(yearsCharSearch.getSelected())))) {
 
-                if (readersArrayList.get(i).yearsLern >= 12) {
+                if (readersArrayList.get(i).yearsLern >= 12&&(yearsCharSearch.getSelectedIndex()==0)) {
                     newReaderAdded = new TextButton(readersArrayList.get(i).surname + " " + readersArrayList.get(i).name + " Cотрудник", skinTree, "textbuttonlist");
 
                 } else {
@@ -2834,7 +2905,8 @@ if (!chooseObject) {
                 surnameReader.setColor(Color.WHITE);
                 patronymicReader.setColor(Color.WHITE);
 
-                if ((nameReader.getText().equals("")) || (surnameReader.getText().equals("")) || (patronymicReader.getText().equals(""))) {
+                if ((nameReader.getText().equals("")) || (surnameReader.getText().equals("")) || (patronymicReader.getText().equals(""))||(chekNoNormalName(nameReader.getText())||chekNoNormalName(surnameReader.getText())||chekNoNormalName(patronymicReader.getText()))) {
+                    errorNewReader.setText(  " Заполните обязательные поля");
                     if ((nameReader.getText().equals(""))) {
                         nameReader.setColor(Color.RED);
                     }
@@ -2843,6 +2915,14 @@ if (!chooseObject) {
                     }
                     if ((patronymicReader.getText().equals(""))) {
                         patronymicReader.setColor(Color.RED);
+                    }
+                    System.out.println(chekNoNormalName(nameReader.getText()));
+                    System.out.println(chekNoNormalName(surnameReader.getText()));
+                    System.out.println(chekNoNormalName(patronymicReader.getText()));
+                    if (chekNoNormalName(nameReader.getText())||chekNoNormalName(surnameReader.getText())||chekNoNormalName(patronymicReader.getText())){
+
+                        errorNewReader.setText("фио не имеет букв");
+
                     }
 
                     newReaderTable.add(errorNewReader).fillX();
@@ -2910,9 +2990,162 @@ if (!chooseObject) {
         giveBookButtonTable.setFillParent(true);
         giveBookButtonTable.setPosition(0, -Gdx.graphics.getHeight() / 4);
         giveBookButton = new TextButton("Выдать книгу", skinTree);
-        giveBookButtonTable.add(giveBookButton);
+        giveBookKlassButton = new TextButton(" Выдать книгу всему классу " , skinTree);
+        giveBookButtonTable.add(giveBookButton).pad(10);
+        giveBookButtonTable.add(giveBookKlassButton);
         erorTextField = new TextField("", skinTree);
         erorTextField.setDisabled(true);
+
+        giveBookKlassButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                erorTextField.setText(" для этих учеников не хватило книг:");
+
+                erorTextField.setWidth(35);
+                if ((bookOnGivMenuTable.getRows() == 3) && (readersOnGivMenuTable.getRows() >= 2)) {
+                    for (Readers value : readersArrayList) {
+                        bookDetected=false;
+                      if(  (""+ value.yearsLern).equals("" +
+                                        (int) (classOfReadersOnGivMenuSelectBox.getSelectedIndex() + 1))) {
+
+if (erorTextField.getWidth()==35){
+                          for (Book book : bookArrayList) {
+
+                              if ((book.author.equals(authorOfBookOnGivMenuSelectBox.getSelected())) &&
+                                      (book.name.equals(nameOfBookOnGivMenuSelectBox.getSelected())) &&
+                                      (book.genre.equals(genreOfBookOnGivMenuSelectBox.getSelected())) &&
+                                      (book.dataOfGiven == null)) {
+
+
+                                  if (classOfReadersOnGivMenuSelectBox.getSelectedIndex() > 10) {
+
+                                          book.giveBook(value);
+                                          bookOnHendNumberInt++;
+                                          if (value.yearsLern > 11) {
+                                              logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " сотрудник");
+
+                                          } else {
+                                              logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " " + value.yearsLern + " " + value.charClass);
+                                          }
+
+                                          Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
+                                                  , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
+
+                                          bookDetected = true;
+                                         break;
+
+                                  } else if (("" + value.charClass).equals((String) charClassGivMenu.getSelected())) {
+                                      book.giveBook(value);
+                                      bookOnHendNumberInt++;
+                                      if (value.yearsLern > 11) {
+                                          logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " сотрудник");
+
+                                      } else {
+                                          logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " " + value.yearsLern + " " + value.charClass);
+
+                                      }
+
+                                      Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
+                                              , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
+
+                                      bookDetected = true;
+                                      break;
+                                  }
+                              }
+                          }}
+
+                          if (!bookDetected) {
+if (erorTextField.getText().length()<90) {
+    if (erorTextField.getText().length()==27){
+        erorTextField.setText(erorTextField.getText() + value.surname + " " + value.name );
+
+    }else {
+        erorTextField.setText(erorTextField.getText()+", " + value.surname + " " + value.name );
+
+    }
+    erorTextField.setColor(Color.RED);
+    erorTextField.setWidth(1335);
+    erorTextField.setPosition(Gdx.graphics.getWidth() / 2 - erorTextField.getWidth() / 2, 20);
+    stage.addActor(erorTextField);
+}  }
+
+
+
+                      }
+                      } if (erorTextField.getWidth()!=1335){
+                        stage.clear();
+                        meinMenuUsed();
+                        stage.addActor(mainMenuTable);
+                        stage.addActor(tableListAllBook);
+                        allBook.setColor(Color.RED);
+                        stage.addActor(numberAllBookTable);
+                        stage.addActor(readerThisBookTable);
+                        getAuthorForSearch();
+                        bookMenuTipNow = 0;
+                        stage.addActor(infoMenuTable);
+                        stage.addActor(searchMenuBookTable);
+                        stage.addActor(descriptionInfoTable);
+                        stage.addActor(deleteTable);
+                        infoMenuTip = 1;
+                        deleteTable.clear();
+                        deleteTable.setPosition(700, 180);
+                        deleteTable.add(redactButton).pad(2).row();
+                        deleteTable.add(deleteButton);
+                        allBookScrollPaneTable.clear();
+                        bookOnLibrary.setText(" " + (numberOfBook - bookOnHendNumberInt));
+                        bookOnHendNumber.setText(" " + bookOnHendNumberInt);
+                        allBookOnMyHendListUpdate();
+                    }else {
+                        stage.clear();
+                        meinMenuUsed();
+                        stage.addActor(mainMenuTable);
+                        stage.addActor(tableListAllBook);
+                        allBook.setColor(Color.RED);
+                        stage.addActor(numberAllBookTable);
+                        stage.addActor(readerThisBookTable);
+                        getAuthorForSearch();
+                        bookMenuTipNow = 0;
+                        stage.addActor(infoMenuTable);
+                        stage.addActor(searchMenuBookTable);
+                        stage.addActor(descriptionInfoTable);
+                        stage.addActor(deleteTable);
+                        infoMenuTip = 1;
+                        deleteTable.clear();
+                        deleteTable.setPosition(700, 180);
+                        deleteTable.add(redactButton).pad(2).row();
+                        deleteTable.add(deleteButton);
+                        allBookScrollPaneTable.clear();
+                        bookOnLibrary.setText(" " + (numberOfBook - bookOnHendNumberInt));
+                        bookOnHendNumber.setText(" " + bookOnHendNumberInt);
+                        allBookOnMyHendListUpdate();
+                        stage.addActor(erorTextField);}
+                    if ( (erorTextField.getText().length()>=90)){
+                        erorTextField.setText(erorTextField.getText() + "и др. ");
+
+                    }
+
+
+
+
+                } else {
+                    stage.clear();
+                    stage.addActor(mainMenuTable);
+                    stage.addActor(numberAllBookTable);
+                    stage.addActor(giveBookButtonTable);
+                    stage.addActor(readersOnGivMenuTable);
+                    stage.addActor(bookOnGivMenuTable);
+                    erorTextField.setText(" " + "Выберите книгу и класс");
+                    erorTextField.setColor(Color.RED);
+                    erorTextField.setWidth(335);
+                    erorTextField.setPosition(Gdx.graphics.getWidth() / 2 - erorTextField.getWidth() / 2, 20);
+                    stage.addActor(erorTextField);
+                }
+
+            }
+        });
+
+
+
         giveBookButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
