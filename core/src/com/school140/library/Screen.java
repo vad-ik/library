@@ -11,10 +11,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 // TODO: 09.02.2022  при нажатии на книгу считывается ее название (button name) являюшийся id
@@ -23,6 +28,12 @@ public class Screen {
     boolean bookDetected;
     String nameNewBookButton;
     static Skin skinTree;
+    XSSFWorkbook workbook;
+    Cell cell;
+    Row row;
+    XSSFSheet sheet;
+    XSSFCellStyle style;
+
     Array<String> charOfClassArray = new Array<>();
     static String descriptionString;
     static Stage stage;
@@ -34,7 +45,7 @@ public class Screen {
     List allReaderList;
     Label saveError;
     String reportName;
-    boolean errorRedact=false;
+    boolean errorRedact = false;
     SelectBox reportYearsName;
     SelectBox reportCharName;
     SelectBox reportNameName;
@@ -52,6 +63,7 @@ public class Screen {
     TextField bookCoverRedact;
     SelectBox bookGenreRedact;
     TextButton report;
+    int rownum = 0;
     TextField reportString;
     TextButton reportAll;
     TextButton reportGivReturn;
@@ -214,13 +226,15 @@ public class Screen {
     TextButton saveButton;
     int numberRedactMinusBook = 0;
     Table readersOnReportMenuTable = new Table();
-     boolean intNormRedact;
+    boolean intNormRedact;
 
     public Screen() {
 
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-
+        workbook = new XSSFWorkbook();
+        sheet = workbook.createSheet("Employees sheet");
+        style = createStyleForTitle(workbook);
         skinTree = new Skin(Gdx.files.internal("TreeButton/treeSkin3.json"));
 
 
@@ -237,6 +251,14 @@ public class Screen {
         stage.addActor(mainMenuTable);
 
 
+    }
+
+    private XSSFCellStyle createStyleForTitle(XSSFWorkbook workbook) {
+        XSSFFont font = workbook.createFont();
+        font.setBold(true);
+        XSSFCellStyle style = workbook.createCellStyle();
+        style.setFont(font);
+        return style;
     }
 
     private void redactMenu() {
@@ -265,77 +287,20 @@ public class Screen {
         redactBookButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                intNormRedact=true;
+                intNormRedact = true;
                 try {
                     Integer.parseInt(numberBookRedact.getText());
-                    if (  Integer.parseInt(numberBookRedact.getText())<0|| Integer.parseInt(numberBookRedact.getText())>1000){
+                    if (Integer.parseInt(numberBookRedact.getText()) < 0 || Integer.parseInt(numberBookRedact.getText()) > 1000) {
                         Integer.parseInt("i");
 
-                }
-                }catch (NumberFormatException e){
-                  intNormRedact=false;
-                }
-                if (intNormRedact){
-                redactSave = bookArrayList.get(index).name + bookArrayList.get(index).author + bookArrayList.get(index).genre;
-
-                if (numberThisBook < Integer.parseInt(numberBookRedact.getText())) {
-                    descriptionString = "";
-                    for (int i = 1; i < bookDescriptionRedact.getText().length() + 1; i++) {
-                        descriptionString += bookDescriptionRedact.getText().charAt(i - 1);
-
-                        if ((i % 25 / 16 > 0) && ((String.valueOf(bookDescriptionRedact.getText().charAt(i - 1))).equals(" "))) {
-                            descriptionString += "\n";
-                        }
                     }
-                    for (int i = 0; i < Integer.parseInt(numberBookRedact.getText()) - numberThisBook; i++) {
-                        bookArrayList.add(new Book( bookNameRedact.getText(), bookAuthorRedact.getText(),
-                                String.valueOf(bookGenreRedact.getSelected()), descriptionString, bookCoverRedact.getText()));
-
-                    }
-
-                } else if (numberThisBook > Integer.parseInt(numberBookRedact.getText())) {
-                    numberRedactMinusBook = 0;
-
-                    for (int i = 0; i < bookArrayList.size() - numberRedactMinusBook; i++) {
-                        if (redactSave.equals(bookArrayList.get(i).name + bookArrayList.get(i).author + bookArrayList.get(i).genre)&&( bookArrayList.get(i).reader==null)) {
-                            if (numberThisBook - Integer.parseInt(numberBookRedact.getText()) - numberRedactMinusBook != 0) {
-                                bookArrayList.remove(i);
-                                numberRedactMinusBook++;
-                                i--;
-                            }
-                        }
-                    }
-                    errorRedact=false;
-if (numberRedactMinusBook!=numberThisBook-Integer.parseInt(numberBookRedact.getText())){
-    errorDelLabel.setText(" Не все книги были удалены, \n часть из них выданна");
-
-
-    errorRedact=true;
-}
-                }
-                coverReal = true;
-                try {
-                    if (!bookCoverRedact.getText().equals("noimg.png")) {
-                        if (Gdx.files.absolute(bookCoverRedact.getText()).exists()) {
-                            Gdx.files.absolute(bookCoverRedact.getText()).copyTo(Gdx.files.external("/.prefs/Library/cover/" + bookNameRedact.getText() + bookAuthorRedact.getText() + ".png"));
-                        } else {
-                            if (Gdx.files.internal(bookCoverRedact.getText()).exists()) {
-                                Gdx.files.internal(bookCoverRedact.getText()).copyTo(Gdx.files.external("/.prefs/Library/cover/" + bookNameRedact.getText() + bookAuthorRedact.getText() + ".png"));
-                            }
-                        }
-                    }
-
-
                 } catch (NumberFormatException e) {
-                    coverReal = false;
+                    intNormRedact = false;
                 }
-                for (Book book : bookArrayList) {
+                if (intNormRedact) {
+                    redactSave = bookArrayList.get(index).name + bookArrayList.get(index).author + bookArrayList.get(index).genre;
 
-
-                    if (redactSave.equals(book.name + book.author + book.genre)) {
-                        book.author = bookAuthorRedact.getText();
-                        book.name = bookNameRedact.getText();
-                        book.genre = String.valueOf(bookGenreRedact.getSelected());
+                    if (numberThisBook < Integer.parseInt(numberBookRedact.getText())) {
                         descriptionString = "";
                         for (int i = 1; i < bookDescriptionRedact.getText().length() + 1; i++) {
                             descriptionString += bookDescriptionRedact.getText().charAt(i - 1);
@@ -344,41 +309,99 @@ if (numberRedactMinusBook!=numberThisBook-Integer.parseInt(numberBookRedact.getT
                                 descriptionString += "\n";
                             }
                         }
-                        book.description = descriptionString;
+                        for (int i = 0; i < Integer.parseInt(numberBookRedact.getText()) - numberThisBook; i++) {
+                            bookArrayList.add(new Book(bookNameRedact.getText(), bookAuthorRedact.getText(),
+                                    String.valueOf(bookGenreRedact.getSelected()), descriptionString, bookCoverRedact.getText()));
 
-                        if (coverReal) {
-                            if (!bookCoverRedact.getText().equals("noimg.png")) {
-                                book.coverBook = "/.prefs/Library/cover/" + bookNameRedact.getText() + bookAuthorRedact.getText() + ".png";
-                            } else book.coverBook = "noimg.png";
+                        }
+
+                    } else if (numberThisBook > Integer.parseInt(numberBookRedact.getText())) {
+                        numberRedactMinusBook = 0;
+
+                        for (int i = 0; i < bookArrayList.size() - numberRedactMinusBook; i++) {
+                            if (redactSave.equals(bookArrayList.get(i).name + bookArrayList.get(i).author + bookArrayList.get(i).genre) && (bookArrayList.get(i).reader == null)) {
+                                if (numberThisBook - Integer.parseInt(numberBookRedact.getText()) - numberRedactMinusBook != 0) {
+                                    bookArrayList.remove(i);
+                                    numberRedactMinusBook++;
+                                    i--;
+                                }
+                            }
+                        }
+                        errorRedact = false;
+                        if (numberRedactMinusBook != numberThisBook - Integer.parseInt(numberBookRedact.getText())) {
+                            errorDelLabel.setText(" Не все книги были удалены, \n часть из них выданна");
+
+
+                            errorRedact = true;
                         }
                     }
-                }
+                    coverReal = true;
+                    try {
+                        if (!bookCoverRedact.getText().equals("noimg.png")) {
+                            if (Gdx.files.absolute(bookCoverRedact.getText()).exists()) {
+                                Gdx.files.absolute(bookCoverRedact.getText()).copyTo(Gdx.files.external("/.prefs/Library/cover/" + bookNameRedact.getText() + bookAuthorRedact.getText() + ".png"));
+                            } else {
+                                if (Gdx.files.internal(bookCoverRedact.getText()).exists()) {
+                                    Gdx.files.internal(bookCoverRedact.getText()).copyTo(Gdx.files.external("/.prefs/Library/cover/" + bookNameRedact.getText() + bookAuthorRedact.getText() + ".png"));
+                                }
+                            }
+                        }
 
 
-                stage.clear();
-                stage.addActor(mainMenuTable);
-                stage.addActor(tableListAllBook);
-                stage.addActor(numberAllBookTable);
-                stage.addActor(readerThisBookTable);
-                if (errorRedact){
-                    stage.addActor(errorDelTable);
+                    } catch (NumberFormatException e) {
+                        coverReal = false;
+                    }
+                    for (Book book : bookArrayList) {
+
+
+                        if (redactSave.equals(book.name + book.author + book.genre)) {
+                            book.author = bookAuthorRedact.getText();
+                            book.name = bookNameRedact.getText();
+                            book.genre = String.valueOf(bookGenreRedact.getSelected());
+                            descriptionString = "";
+                            for (int i = 1; i < bookDescriptionRedact.getText().length() + 1; i++) {
+                                descriptionString += bookDescriptionRedact.getText().charAt(i - 1);
+
+                                if ((i % 25 / 16 > 0) && ((String.valueOf(bookDescriptionRedact.getText().charAt(i - 1))).equals(" "))) {
+                                    descriptionString += "\n";
+                                }
+                            }
+                            book.description = descriptionString;
+
+                            if (coverReal) {
+                                if (!bookCoverRedact.getText().equals("noimg.png")) {
+                                    book.coverBook = "/.prefs/Library/cover/" + bookNameRedact.getText() + bookAuthorRedact.getText() + ".png";
+                                } else book.coverBook = "noimg.png";
+                            }
+                        }
+                    }
+
+
+                    stage.clear();
+                    stage.addActor(mainMenuTable);
+                    stage.addActor(tableListAllBook);
+                    stage.addActor(numberAllBookTable);
+                    stage.addActor(readerThisBookTable);
+                    if (errorRedact) {
+                        stage.addActor(errorDelTable);
+                    }
+                    descriptionWindow.setText("Описание");
+                    stage.addActor(descriptionInfoTable);
+                    stage.addActor(infoMenuTable);
+                    infoMenuTip = 1;
+                    stage.addActor(deleteTable);
+                    meinMenuUsed();
+                    allBook.setColor(Color.RED);
+                    getAuthorForSearch();
+                    bookMenuTipNow = 0;
+                    stage.addActor(searchMenuBookTable);
+                    deleteTable.clear();
+                    deleteTable.setPosition(700, 180);
+                    deleteTable.add(redactButton).pad(2).row();
+                    deleteTable.add(deleteButton);
+                    allBookListUpdate();
                 }
-                descriptionWindow.setText("Описание");
-                stage.addActor(descriptionInfoTable);
-                stage.addActor(infoMenuTable);
-                infoMenuTip = 1;
-                stage.addActor(deleteTable);
-                meinMenuUsed();
-                allBook.setColor(Color.RED);
-                getAuthorForSearch();
-                bookMenuTipNow = 0;
-                stage.addActor(searchMenuBookTable);
-                deleteTable.clear();
-                deleteTable.setPosition(700, 180);
-                deleteTable.add(redactButton).pad(2).row();
-                deleteTable.add(deleteButton);
-                allBookListUpdate();
-              }}
+            }
         });
 
 
@@ -533,8 +556,6 @@ if (numberRedactMinusBook!=numberThisBook-Integer.parseInt(numberBookRedact.getT
 
         charForSerch.clear();
         charForSerch.add(" Все буквы");
-       
-
 
 
         for (Readers reader : readersArrayList) {
@@ -546,8 +567,7 @@ if (numberRedactMinusBook!=numberThisBook-Integer.parseInt(numberBookRedact.getT
             ) {
 
                 if (!charForSerch.contains(reader.charClass, false)) {
-                    if(reader.yearsLern<12){
-
+                    if (reader.yearsLern < 12) {
 
 
                         charForSerch.add(reader.charClass);
@@ -563,16 +583,15 @@ if (numberRedactMinusBook!=numberThisBook-Integer.parseInt(numberBookRedact.getT
         authorForSerch.add(" Все авторы");
         for (Book book : bookArrayList) {
 
-            authorThisTable=true;
-if (bookMenuTipNow==2&&book.reader!=null){
-    authorThisTable=false;
-}else if (bookMenuTipNow==1&&book.reader==null){
-    authorThisTable=false;
-}
+            authorThisTable = true;
+            if (bookMenuTipNow == 2 && book.reader != null) {
+                authorThisTable = false;
+            } else if (bookMenuTipNow == 1 && book.reader == null) {
+                authorThisTable = false;
+            }
 
 
-
-            if (authorThisTable){
+            if (authorThisTable) {
                 if ((nameBookSearch.equals("")) || (nameBookSearch.equals(null))) {
                     if (genreSearch.getSelectedIndex() == 0) {
                         if (!authorForSerch.contains(book.author, false)) {
@@ -597,7 +616,7 @@ if (bookMenuTipNow==2&&book.reader!=null){
                         }
                     }
                 }
-        }
+            }
 
         }
     }
@@ -645,9 +664,9 @@ if (bookMenuTipNow==2&&book.reader!=null){
                             try {
 
                                 if (readersArrayList.get(index).yearsLern < 12) {
-                                    logNewString((new GregorianCalendar()).getTime() + " читатель удален из системы " + readersArrayList.get(index).surname + " " + readersArrayList.get(index).name + " " + readersArrayList.get(index).yearsLern + " " + readersArrayList.get(index).charClass);
+                                    logNewString((new GregorianCalendar()).getTime() + " читатель удален из системы " + readersArrayList.get(index).surname + " " + readersArrayList.get(index).name + "///" + readersArrayList.get(index).yearsLern + " " + readersArrayList.get(index).charClass);
                                 } else {
-                                    logNewString((new GregorianCalendar()).getTime() + " читатель удален из системы " + readersArrayList.get(index).surname + " " + readersArrayList.get(index).name + " сотрудник");
+                                    logNewString((new GregorianCalendar()).getTime() + " читатель удален из системы " + readersArrayList.get(index).surname + " " + readersArrayList.get(index).name + "///сотрудник");
 
                                 }
                                 readersArrayList.remove(index);
@@ -699,7 +718,7 @@ if (bookMenuTipNow==2&&book.reader!=null){
                                                 (new GregorianCalendar()).getTime()
                                                         + " книга удалена "
                                                         + bookArrayList.get(i).author +
-                                                        " " + bookArrayList.get(i).name);
+                                                        "///" + bookArrayList.get(i).name);
                                         bookArrayList.remove(i);
 
                                     } catch (NullPointerException e) {
@@ -917,8 +936,8 @@ if (bookMenuTipNow==2&&book.reader!=null){
                             numberWindow.setText(" Количество: " + (bookNumber));
                             numberBookOfHendWindow.setText(" В наличии: " + (bookNumberOfHend));
 
-                            if (Gdx.files.absolute(Gdx.files.external(bookArrayList.get(index).coverBook).file().getAbsolutePath()+".png").exists()) {
-                                imageWindow = new Texture(Gdx.files.absolute(Gdx.files.external(bookArrayList.get(index).coverBook).file().getAbsolutePath()+".png"));
+                            if (Gdx.files.absolute(Gdx.files.external(bookArrayList.get(index).coverBook).file().getAbsolutePath() + ".png").exists()) {
+                                imageWindow = new Texture(Gdx.files.absolute(Gdx.files.external(bookArrayList.get(index).coverBook).file().getAbsolutePath() + ".png"));
                             } else {
                                 imageWindow = new Texture(Gdx.files.internal("noimg.png"));
                                 bookArrayList.get(index).coverBook = "noimg.png";
@@ -1198,115 +1217,337 @@ if (bookMenuTipNow==2&&book.reader!=null){
 
 
                 delrep = true;
-                if (reportBookTable.getChildren().size==3) {
-                          reportName =reportAuthorBook.getSelected().toString()+" "+reportNameBook.getSelected().toString();
-                    try (FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnBook.txt")).file(), false
+                if (reportBookTable.getChildren().size==3){
+                    reportName =reportAuthorBook.getSelected().toString()+"///"+reportNameBook.getSelected().toString();
 
-                    )) {
+                    if (Objects.equals(reportString.getText(), "")) {
 
-                        writer.write("");
-                        writer.flush();
-                    } catch (IOException ex) {
-                        delrep = false;
+
+
+                        rownum = 1;
+                        row = sheet.createRow(rownum);
+
+                        cell = row.createCell(0, CellType.STRING);
+                        cell.setCellValue("Ученик");
+
+                        cell = row.createCell(1, CellType.STRING);
+                        cell.setCellValue("Класс");
+
+                        cell = row.createCell(2, CellType.STRING);
+                        cell.setCellValue("Операция");
+
+                        cell = row.createCell(3, CellType.NUMERIC);
+                        cell.setCellValue("Дата");
+
+                        cell = row.createCell(4, CellType.NUMERIC);
+                        cell.setCellValue("Книга");
+
+                        cell = row.createCell(5, CellType.NUMERIC);
+                        cell.setCellValue("Автор");
+
+
+                        try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
+
+                    // читаем посимвольно
+                    int c;
+                    String str = "";
+                    while ((c = reader.read()) != -1) {
+
+                        str += (char) c;
                     }
-                    try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
-                        try (FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnBook.txt")).file(), true
-                        )) {
-                            int c;
-                            String s = "";
 
+
+                    for (String s : str.split("\n")) {
+if (s.contains(reportName)){
+    rownum++;
+    row = sheet.createRow(rownum);
+                        if (s.contains("книга удалена")) {
+
+                            cell = row.createCell(2, CellType.STRING);
+                            cell.setCellValue("Удаление книги");
+
+                            cell = row.createCell(4, CellType.NUMERIC);
+                            cell.setCellValue((s.split("книга удалена")[1]).split("///")[0]);
+
+                            cell = row.createCell(5, CellType.NUMERIC);
+                            cell.setCellValue((s.split("книга удалена")[1]).split("///")[1]);
+                        } else if (s.contains("новая книга")) {
+
+                            cell = row.createCell(2, CellType.STRING);
+                            cell.setCellValue("добаавлена книга");
+
+                            cell = row.createCell(4, CellType.NUMERIC);
+                            cell.setCellValue((s.split("новая книга")[1]).split("///")[0]);
+
+                            cell = row.createCell(5, CellType.NUMERIC);
+                            cell.setCellValue((s.split("новая книга")[1]).split("///")[1]);
+
+                            cell = row.createCell(6, CellType.NUMERIC);
+                            cell.setCellValue((s.split("в количестве")[1]));
+
+                        } else if (s.contains("новая персона")) {
+
+                            cell = row.createCell(2, CellType.STRING);
+                            cell.setCellValue(" новый читатель");
+
+                            cell = row.createCell(0, CellType.NUMERIC);
+                            cell.setCellValue((s.split("новая персона")[1]).split("///")[0]);
+                            if ((s.split("новая персона")[1]).split("///")[1].contains("сотрудник")) {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue("сотрудник");
+
+                            } else {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue((s.split("новая персона")[1]).split("///")[1]);
+                            }
+                        }else if (s.contains("читатель удален из системы")) {
+
+                            cell = row.createCell(2, CellType.STRING);
+                            cell.setCellValue("читатель удален");
+
+                            cell = row.createCell(0, CellType.NUMERIC);
+                            cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[0]);
+
+                            if ((s.split("читатель удален из системы")[1]).split("///")[1].contains("сотрудник")) {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue("сотрудник");
+
+                            } else {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[1]);
+                            }
+                        }else if (s.contains("выдана")) {
+                            cell = row.createCell(0, CellType.NUMERIC);
+                            cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                            if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue("сотрудник");
+
+                            } else {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                            }
+
+                            cell = row.createCell(2, CellType.NUMERIC);
+                            cell.setCellValue("книга выдана");
+
+
+                            cell = row.createCell(4, CellType.NUMERIC);
+                            cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                            cell = row.createCell(5, CellType.NUMERIC);
+                            cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                        }else if (s.contains("вернул")) {
+                            cell = row.createCell(0, CellType.NUMERIC);
+                            cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                            if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue("сотрудник");
+
+                            } else {
+                                cell = row.createCell(1, CellType.NUMERIC);
+                                cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                            }
+
+                            cell = row.createCell(2, CellType.NUMERIC);
+                            cell.setCellValue("книга возвращена");
+
+
+                            cell = row.createCell(4, CellType.NUMERIC);
+                            cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                            cell = row.createCell(5, CellType.NUMERIC);
+                            cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
+                        }else {
+                            System.out.println(s);
+                        }
+                        cell = row.createCell(3, CellType.NUMERIC);
+                        cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
+
+                    }}
+                    File file = new File(Gdx.files.external("/Downloads/"+reportName.split("///")[0]+" "+reportName.split("///")[1]+" " +(new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2]+".xlsx").file().getAbsolutePath());
+                    file.getParentFile().mkdirs();
+
+                    FileOutputStream outFile = new FileOutputStream(file);
+                    workbook.write(outFile);
+
+
+                } catch (IOException ex) {
+                    System.out.println(ex);
+                    delrep = false;
+                }
+
+
+
+            } else{
+                if (Gdx.files.absolute(reportString.getText()).exists()) {
+
+
+                        rownum = 1;
+                        row = sheet.createRow(rownum);
+
+                        cell = row.createCell(0, CellType.STRING);
+                        cell.setCellValue("Ученик");
+
+                        cell = row.createCell(1, CellType.STRING);
+                        cell.setCellValue("Класс");
+
+                        cell = row.createCell(2, CellType.STRING);
+                        cell.setCellValue("Операция");
+
+                        cell = row.createCell(3, CellType.NUMERIC);
+                        cell.setCellValue("Дата");
+
+                        cell = row.createCell(4, CellType.NUMERIC);
+                        cell.setCellValue("Книга");
+
+                        cell = row.createCell(5, CellType.NUMERIC);
+                        cell.setCellValue("Автор");
+
+                        try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
+
+                            // читаем посимвольно
+                            int c;
+                            String str = "";
                             while ((c = reader.read()) != -1) {
 
-                                s += ((char) c);
+                                str += (char) c;
                             }
-                            bookReportInt = 0;
-                            for (String s1 : s.split("\n")) {
 
-                                if (s1.contains(reportName)) {
-                                    // запись всей строки
-                                    text = s1;
-                                    writer.write(text);
-                                    // запись по символам
-                                    writer.append('\n');
 
-                                    if (s1.contains("выдана")) {
-                                        bookReportInt++;
+                            for (String s : str.split("\n")) {
+                                if (s.contains(reportName)) {
+                                    rownum++;
+                                    row = sheet.createRow(rownum);
+
+                                    if (s.contains("книга удалена")) {
+
+                                        cell = row.createCell(2, CellType.STRING);
+                                        cell.setCellValue("Удаление книги");
+
+                                        cell = row.createCell(4, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("книга удалена")[1]).split("///")[0]);
+
+                                        cell = row.createCell(5, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("книга удалена")[1]).split("///")[1]);
+                                    } else if (s.contains("новая книга")) {
+
+                                        cell = row.createCell(2, CellType.STRING);
+                                        cell.setCellValue("добаавлена книга");
+
+                                        cell = row.createCell(4, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("новая книга")[1]).split("///")[0]);
+
+                                        cell = row.createCell(5, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("новая книга")[1]).split("///")[1]);
+
+                                        cell = row.createCell(6, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("в количестве")[1]));
+
+                                    } else if (s.contains("новая персона")) {
+
+                                        cell = row.createCell(2, CellType.STRING);
+                                        cell.setCellValue(" новый читатель");
+
+                                        cell = row.createCell(0, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("новая персона")[1]).split("///")[0]);
+                                        if ((s.split("новая персона")[1]).split("///")[1].contains("сотрудник")) {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue("сотрудник");
+
+                                        } else {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue((s.split("новая персона")[1]).split("///")[1]);
+                                        }
+                                    } else if (s.contains("читатель удален из системы")) {
+
+                                        cell = row.createCell(2, CellType.STRING);
+                                        cell.setCellValue("читатель удален");
+
+                                        cell = row.createCell(0, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[0]);
+
+                                        if ((s.split("читатель удален из системы")[1]).split("///")[1].contains("сотрудник")) {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue("сотрудник");
+
+                                        } else {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[1]);
+                                        }
+                                    } else if (s.contains("выдана")) {
+                                        cell = row.createCell(0, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                                        if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue("сотрудник");
+
+                                        } else {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                                        }
+
+                                        cell = row.createCell(2, CellType.NUMERIC);
+                                        cell.setCellValue("книга выдана");
+
+
+                                        cell = row.createCell(4, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                                        cell = row.createCell(5, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                                    } else if (s.contains("вернул")) {
+                                        cell = row.createCell(0, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                                        if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue("сотрудник");
+
+                                        } else {
+                                            cell = row.createCell(1, CellType.NUMERIC);
+                                            cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                                        }
+
+                                        cell = row.createCell(2, CellType.NUMERIC);
+                                        cell.setCellValue("книга возвращена");
+
+
+                                        cell = row.createCell(4, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                                        cell = row.createCell(5, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
+                                    } else {
+                                        System.out.println(s);
                                     }
-                                }
+                                    cell = row.createCell(3, CellType.NUMERIC);
+                                    cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
 
+                                } }
+                            File file = new File(Gdx.files.absolute(reportString.getText() + "/Статистика на книгу "+reportName.split("///")[0]+" "+reportName.split("///")[1]+" " + (new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2]+ ".xlsx").file().getAbsolutePath());
+                            file.getParentFile().mkdirs();
 
-                            }
-                            for (Book book : bookArrayList) {
-if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equals(reportAuthorBook.getSelected().toString())) {
-    readerThisBookUpdate(book);
-    break;
-}  }
-
-                            // запись всей строки
-                            text = "--------------------итог--------------------";
-                            writer.write(text);
-                            // запись по символам
-                            writer.append('\n');
-
-
-                            if (readerBookArrey.size != 0) {
-                                text = "не вернули эту книгу:";
-                                writer.write(text);
-                                writer.append('\n');
-                                for (int i = 0; i < readerBookArrey.size; i++) {
-                                    text = readerBookArrey.get(i);
-                                    writer.write(text);
-                                    writer.append('\n');
-                                }
-                            } else {
-                                text = "все книги в библиотеке:";
-                                writer.write(text);
-                                writer.append('\n');
-                            }
-
-                            writer.append('\n');
-                            writer.append('\n');
-
-                            text = " книг взято за все время:" + bookReportInt;
-                            writer.write(text);
-                            // запись по символам
-                            writer.append('\n');
-                            text = " книг выдано на данный момент:" +readerBookArrey.size ;
-                            writer.write(text);
-                            // запись по символам
-                            writer.append('\n');
-
-
-                            writer.flush();
-                            if (Objects.equals(reportString.getText(), "")) {
-                                try {
-                                    (Gdx.files.external("/.prefs/Library/reportOnBook.txt")).copyTo(Gdx.files.external("/Downloads/отчет " + reportName + ".txt"));
-                                    pathReport = Gdx.files.external("/Downloads/отчет " + reportName + ".txt").file().getAbsolutePath();
-                                } catch (Exception e) {
-                                    delrep = false;
-                                }
-
-                            } else {
-                                if (Gdx.files.absolute(reportString.getText()).exists()) {
-                                    try {
-                                        (Gdx.files.external("/.prefs/Library/reportOnBook.txt")).copyTo(Gdx.files.absolute(reportString.getText() + "/отчет " + reportName + ".txt"));
-                                        pathReport = Gdx.files.absolute(reportString.getText() + "/отчет " + reportName + ".txt").file().getAbsolutePath();
-                                    } catch (Exception e) {
-                                        delrep = false;
-                                    }
-                                } else {
-                                    reportString.setText(null);
-                                    reportString.setMessageText("такого пути не существует");
-                                }
-                            }
+                            FileOutputStream outFile = new FileOutputStream(file);
+                            workbook.write(outFile);
 
 
                         } catch (IOException ex) {
+                            System.out.println(ex);
                             delrep = false;
                         }
-                    } catch (IOException ex) {
-                        delrep = false;
-                    }
+
+
+                    } else {
+                    reportString.setText(null);
+                    reportString.setMessageText("такого пути не существует");
+                }
+            }
                     if (delrep) {
                         reportСompleted.setText("отчет успешно сохранен\n" +
                                 pathReport);
@@ -1331,7 +1572,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 for (Book book : bookArrayList) {
                     if ((book.genre.equals(reportGenreBook.getSelected())) && ((!(reportBookStr.contains(book.author)) && (book.author.length() < 18)))) {
                         reportBookStr.add(book.author);
-                    } else if ((book.author.length() >= 18)&&(book.genre.equals(reportGenreBook.getSelected()))) {
+                    } else if ((book.author.length() >= 18) && (book.genre.equals(reportGenreBook.getSelected()))) {
                         if (!(reportBookStr.contains(
                                 String.valueOf(book.author.charAt(0)) + book.author.charAt(1) + book.author.charAt(2) + book.author.charAt(3) + book.author.charAt(4) +
                                         book.author.charAt(5) + book.author.charAt(6) + book.author.charAt(7) + book.author.charAt(8) + book.author.charAt(9)
@@ -1362,10 +1603,11 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 for (Book book : bookArrayList) {
                     if ((book.genre.equals(reportGenreBook.getSelected()))) {
                         if ((book.author.equals(reportAuthorBook.getSelected())) && (reportAuthorBook.getSelected().toString().length() < 18)) {
-                            if (book.name.length()<18){
-                            if (!(reportBookStr2.contains(book.name))) {
-                                reportBookStr2.add(book.name);
-                            }}else if (!(reportBookStr2.contains(String.valueOf(book.name.charAt(0)) + book.name.charAt(1) + book.name.charAt(2) + book.name.charAt(3) + book.name.charAt(4) +
+                            if (book.name.length() < 18) {
+                                if (!(reportBookStr2.contains(book.name))) {
+                                    reportBookStr2.add(book.name);
+                                }
+                            } else if (!(reportBookStr2.contains(String.valueOf(book.name.charAt(0)) + book.name.charAt(1) + book.name.charAt(2) + book.name.charAt(3) + book.name.charAt(4) +
                                     book.name.charAt(5) + book.name.charAt(6) + book.name.charAt(7) + book.name.charAt(8) + book.name.charAt(9)
                                     + book.name.charAt(10) + book.name.charAt(11) + book.name.charAt(12) + book.name.charAt(13)
                                     + book.name.charAt(14) + book.name.charAt(15) + book.name.charAt(16) + book.name.charAt(17)))
@@ -1389,18 +1631,18 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                                         book.name.charAt(5) + book.name.charAt(6) + book.name.charAt(7) + book.name.charAt(8) + book.name.charAt(9)
                                         + book.name.charAt(10) + book.name.charAt(11) + book.name.charAt(12) + book.name.charAt(13)
                                         + book.name.charAt(14) + book.name.charAt(15) + book.name.charAt(16) + book.name.charAt(17)))
-                                        ) {
+                                ) {
 
 
-                                reportBookStr2.add(String.valueOf(book.name.charAt(0)));
-                                for (int i = 1; i < 18; i++) {
-                                    reportBookStr2.set(reportBookStr2.size() - 1, reportBookStr2.get(reportBookStr2.size() - 1) + book.name.charAt(i));
+                                    reportBookStr2.add(String.valueOf(book.name.charAt(0)));
+                                    for (int i = 1; i < 18; i++) {
+                                        reportBookStr2.set(reportBookStr2.size() - 1, reportBookStr2.get(reportBookStr2.size() - 1) + book.name.charAt(i));
+                                    }
+                                } else if (book.name.length() < 18) {
+                                    if (!(reportBookStr2.contains(book.name))) {
+                                        reportBookStr2.add(book.name);
+                                    }
                                 }
-                            }else if (book.name.length()<18){
-                                        if (!(reportBookStr2.contains(book.name))) {
-                                            reportBookStr2.add(book.name);
-                                        }}
-
 
 
                             }
@@ -1483,21 +1725,326 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 delrep = true;
 
                 if (Objects.equals(reportString.getText(), "")) {
-                    try {
-                        (Gdx.files.external("/.prefs/Library/report.txt")).copyTo(Gdx.files.external("/Downloads/отчет.txt"));
-                        pathReport = Gdx.files.external("/Downloads/отчет.txt").file().getAbsolutePath();
-                    } catch (Exception e) {
+
+                    rownum = 1;
+                    row = sheet.createRow(rownum);
+
+                    cell = row.createCell(0, CellType.STRING);
+                    cell.setCellValue("Ученик");
+
+                    cell = row.createCell(1, CellType.STRING);
+                    cell.setCellValue("Класс");
+
+                    cell = row.createCell(2, CellType.STRING);
+                    cell.setCellValue("Операция");
+
+                    cell = row.createCell(3, CellType.NUMERIC);
+                    cell.setCellValue("Дата");
+
+                    cell = row.createCell(4, CellType.NUMERIC);
+                    cell.setCellValue("Книга");
+
+                    cell = row.createCell(5, CellType.NUMERIC);
+                    cell.setCellValue("Автор");
+
+                    try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
+
+                        // читаем посимвольно
+                        int c;
+                        String str = "";
+                        while ((c = reader.read()) != -1) {
+
+                            str += (char) c;
+                        }
+
+
+                        for (String s : str.split("\n")) {
+                            rownum++;
+                            row = sheet.createRow(rownum);
+
+                            if (s.contains("книга удалена")) {
+
+                                cell = row.createCell(2, CellType.STRING);
+                                cell.setCellValue("Удаление книги");
+
+                                cell = row.createCell(4, CellType.NUMERIC);
+                                cell.setCellValue((s.split("книга удалена")[1]).split("///")[0]);
+
+                                cell = row.createCell(5, CellType.NUMERIC);
+                                cell.setCellValue((s.split("книга удалена")[1]).split("///")[1]);
+                            } else if (s.contains("новая книга")) {
+
+                                cell = row.createCell(2, CellType.STRING);
+                                cell.setCellValue("добаавлена книга");
+
+                                cell = row.createCell(4, CellType.NUMERIC);
+                                cell.setCellValue((s.split("новая книга")[1]).split("///")[0]);
+
+                                cell = row.createCell(5, CellType.NUMERIC);
+                                cell.setCellValue((s.split("новая книга")[1]).split("///")[1]);
+
+                                cell = row.createCell(6, CellType.NUMERIC);
+                                cell.setCellValue((s.split("в количестве")[1]));
+
+                            } else if (s.contains("новая персона")) {
+
+                                cell = row.createCell(2, CellType.STRING);
+                                cell.setCellValue(" новый читатель");
+
+                                cell = row.createCell(0, CellType.NUMERIC);
+                                cell.setCellValue((s.split("новая персона")[1]).split("///")[0]);
+                                if ((s.split("новая персона")[1]).split("///")[1].contains("сотрудник")) {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue("сотрудник");
+
+                                } else {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая персона")[1]).split("///")[1]);
+                                }
+                            }else if (s.contains("читатель удален из системы")) {
+
+                                cell = row.createCell(2, CellType.STRING);
+                                cell.setCellValue("читатель удален");
+
+                                cell = row.createCell(0, CellType.NUMERIC);
+                                cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[0]);
+
+                                if ((s.split("читатель удален из системы")[1]).split("///")[1].contains("сотрудник")) {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue("сотрудник");
+
+                                } else {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[1]);
+                                }
+                            }else if (s.contains("выдана")) {
+                                cell = row.createCell(0, CellType.NUMERIC);
+                                cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                                if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue("сотрудник");
+
+                                } else {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                                }
+
+                                cell = row.createCell(2, CellType.NUMERIC);
+                                cell.setCellValue("книга выдана");
+
+
+                                cell = row.createCell(4, CellType.NUMERIC);
+                                cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                                cell = row.createCell(5, CellType.NUMERIC);
+                                cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                            }else if (s.contains("вернул")) {
+                                cell = row.createCell(0, CellType.NUMERIC);
+                                cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                                if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue("сотрудник");
+
+                                } else {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                                }
+
+                                cell = row.createCell(2, CellType.NUMERIC);
+                                cell.setCellValue("книга возвращена");
+
+
+                                cell = row.createCell(4, CellType.NUMERIC);
+                                cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                                cell = row.createCell(5, CellType.NUMERIC);
+                                cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
+                            }else {
+                                System.out.println(s);
+                            }
+                            cell = row.createCell(3, CellType.NUMERIC);
+                            cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
+
+                        }
+                        File file = new File(Gdx.files.external("/Downloads/Статистика библиотеки до "+ (new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2]+".xlsx").file().getAbsolutePath());
+                        file.getParentFile().mkdirs();
+
+                        FileOutputStream outFile = new FileOutputStream(file);
+                        workbook.write(outFile);
+
+
+                    } catch (IOException ex) {
+                        System.out.println(ex);
                         delrep = false;
                     }
 
+
+
                 } else {
                     if (Gdx.files.absolute(reportString.getText()).exists()) {
-                        try {
-                            (Gdx.files.external("/.prefs/Library/report.txt")).copyTo(Gdx.files.absolute(reportString.getText() + "/отчет.txt"));
-                            pathReport = Gdx.files.absolute(reportString.getText() + "/отчет.txt").file().getAbsolutePath();
-                        } catch (Exception e) {
+
+
+                        rownum = 1;
+                        row = sheet.createRow(rownum);
+
+                        cell = row.createCell(0, CellType.STRING);
+                        cell.setCellValue("Ученик");
+
+                        cell = row.createCell(1, CellType.STRING);
+                        cell.setCellValue("Класс");
+
+                        cell = row.createCell(2, CellType.STRING);
+                        cell.setCellValue("Операция");
+
+                        cell = row.createCell(3, CellType.NUMERIC);
+                        cell.setCellValue("Дата");
+
+                        cell = row.createCell(4, CellType.NUMERIC);
+                        cell.setCellValue("Книга");
+
+                        cell = row.createCell(5, CellType.NUMERIC);
+                        cell.setCellValue("Автор");
+
+                        try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
+
+                            // читаем посимвольно
+                            int c;
+                            String str = "";
+                            while ((c = reader.read()) != -1) {
+
+                                str += (char) c;
+                            }
+
+
+                            for (String s : str.split("\n")) {
+                                rownum++;
+                                row = sheet.createRow(rownum);
+
+                                if (s.contains("книга удалена")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("Удаление книги");
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("книга удалена")[1]).split("///")[0]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("книга удалена")[1]).split("///")[1]);
+                                } else if (s.contains("новая книга")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("добаавлена книга");
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая книга")[1]).split("///")[0]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая книга")[1]).split("///")[1]);
+
+                                    cell = row.createCell(6, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("в количестве")[1]));
+
+                                } else if (s.contains("новая персона")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue(" новый читатель");
+
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая персона")[1]).split("///")[0]);
+                                    if ((s.split("новая персона")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("новая персона")[1]).split("///")[1]);
+                                    }
+                                }else if (s.contains("читатель удален из системы")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("читатель удален");
+
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[0]);
+
+                                    if ((s.split("читатель удален из системы")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[1]);
+                                    }
+                                }else if (s.contains("выдана")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                                    if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга выдана");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                                }else if (s.contains("вернул")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                                    if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга возвращена");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
+                                }else {
+                                    System.out.println(s);
+                                }
+                                cell = row.createCell(3, CellType.NUMERIC);
+                                cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
+
+                            }
+                            File file = new File(Gdx.files.absolute(reportString.getText()+"/Статистика библиотеки до "+ (new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2]+".xlsx").file().getAbsolutePath());
+                            file.getParentFile().mkdirs();
+
+                            FileOutputStream outFile = new FileOutputStream(file);
+                            workbook.write(outFile);
+
+
+                        } catch (IOException ex) {
+                            System.out.println(ex);
                             delrep = false;
                         }
+
+
+
+
                     } else {
                         reportString.setText(null);
                         reportString.setMessageText("такого пути не существует");
@@ -1518,21 +2065,208 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
             public void changed(ChangeEvent changeEvent, Actor actor) {
                 delrep = true;
                 if (Objects.equals(reportString.getText(), "")) {
-                    try {
-                        (Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).copyTo(Gdx.files.external("/Downloads/отчет о выдаче книг.txt"));
-                        pathReport = Gdx.files.external("/Downloads/отчет о выдаче книг.txt").file().getAbsolutePath();
-                    } catch (Exception e) {
+                    rownum = 1;
+                    row = sheet.createRow(rownum);
+
+                    cell = row.createCell(0, CellType.STRING);
+                    cell.setCellValue("Ученик");
+
+                    cell = row.createCell(1, CellType.STRING);
+                    cell.setCellValue("Класс");
+
+                    cell = row.createCell(2, CellType.STRING);
+                    cell.setCellValue("Операция");
+
+                    cell = row.createCell(3, CellType.NUMERIC);
+                    cell.setCellValue("Дата");
+
+                    cell = row.createCell(4, CellType.NUMERIC);
+                    cell.setCellValue("Книга");
+
+                    cell = row.createCell(5, CellType.NUMERIC);
+                    cell.setCellValue("Автор");
+
+                    try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).file())) {
+
+                        // читаем посимвольно
+                        int c;
+                        String str = "";
+                        while ((c = reader.read()) != -1) {
+
+                            str += (char) c;
+                        }
+
+
+                        for (String s : str.split("\n")) {
+                            rownum++;
+                            row = sheet.createRow(rownum);
+
+                          if (s.contains("выдана")) {
+                                cell = row.createCell(0, CellType.NUMERIC);
+                                cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                                if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue("сотрудник");
+
+                                } else {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                                }
+
+                                cell = row.createCell(2, CellType.NUMERIC);
+                                cell.setCellValue("книга выдана");
+
+
+                                cell = row.createCell(4, CellType.NUMERIC);
+                                cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                                cell = row.createCell(5, CellType.NUMERIC);
+                                cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                            }else if (s.contains("вернул")) {
+                                cell = row.createCell(0, CellType.NUMERIC);
+                                cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                                if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue("сотрудник");
+
+                                } else {
+                                    cell = row.createCell(1, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                                }
+
+                                cell = row.createCell(2, CellType.NUMERIC);
+                                cell.setCellValue("книга возвращена");
+
+
+                                cell = row.createCell(4, CellType.NUMERIC);
+                                cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                                cell = row.createCell(5, CellType.NUMERIC);
+                                cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
+                            }
+                            cell = row.createCell(3, CellType.NUMERIC);
+                            cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
+
+                        }
+                        File file = new File(Gdx.files.external("/Downloads/Статистика книговыдачи библиотеки до "+ (new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2]+".xlsx").file().getAbsolutePath());
+                        file.getParentFile().mkdirs();
+
+                        FileOutputStream outFile = new FileOutputStream(file);
+                        workbook.write(outFile);
+
+
+                    } catch (IOException ex) {
+                        System.out.println(ex);
                         delrep = false;
                     }
 
+
+
                 } else {
                     if (Gdx.files.absolute(reportString.getText()).exists()) {
-                        try {
-                            (Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).copyTo(Gdx.files.absolute(reportString.getText() + "/отчет о выдаче книг.txt"));
-                            pathReport = Gdx.files.absolute(reportString.getText() + "/отчет о выдаче книг.txt").file().getAbsolutePath();
-                        } catch (Exception e) {
+                        rownum = 1;
+                        row = sheet.createRow(rownum);
+
+                        cell = row.createCell(0, CellType.STRING);
+                        cell.setCellValue("Ученик");
+
+                        cell = row.createCell(1, CellType.STRING);
+                        cell.setCellValue("Класс");
+
+                        cell = row.createCell(2, CellType.STRING);
+                        cell.setCellValue("Операция");
+
+                        cell = row.createCell(3, CellType.NUMERIC);
+                        cell.setCellValue("Дата");
+
+                        cell = row.createCell(4, CellType.NUMERIC);
+                        cell.setCellValue("Книга");
+
+                        cell = row.createCell(5, CellType.NUMERIC);
+                        cell.setCellValue("Автор");
+
+                        try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/reportGiverBook.txt")).file())) {
+
+                            // читаем посимвольно
+                            int c;
+                            String str = "";
+                            while ((c = reader.read()) != -1) {
+
+                                str += (char) c;
+                            }
+                            for (String s : str.split("\n")) {
+                                rownum++;
+                                row = sheet.createRow(rownum);
+
+                                if (s.contains("выдана")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                                    if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга выдана");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                                }else if (s.contains("вернул")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                                    if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга возвращена");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
+                                }
+                                cell = row.createCell(3, CellType.NUMERIC);
+                                cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
+
+                            }
+                            File file = new File(Gdx.files.absolute(reportString.getText()+"/Статистика книговыдачи библиотеки до "+ (new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2]+".xlsx").file().getAbsolutePath());
+                            file.getParentFile().mkdirs();
+
+                            FileOutputStream outFile = new FileOutputStream(file);
+                            workbook.write(outFile);
+
+
+                        } catch (IOException ex) {
+                            System.out.println(ex);
                             delrep = false;
                         }
+
+
+
+
+
                     } else {
                         reportString.setText(null);
                         reportString.setMessageText(" такого пути не существует");
@@ -1552,119 +2286,352 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 delrep = true;
                 if (reportOnNameOn) {
                     if (reportYearsName.getSelectedIndex() + 1 < 12) {
-                        reportName = reportNameName.getSelected() + " " + (reportYearsName.getSelectedIndex() + 1) + " " + reportCharName.getSelected();
+                        reportName = reportNameName.getSelected() + "///" + (reportYearsName.getSelectedIndex() + 1) + " " + reportCharName.getSelected();
                     } else {
-                        reportName = reportNameName.getSelected() + " сотрудник";
+                        reportName = reportNameName.getSelected() + "///сотрудник";
 
                     }
-                    try (FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnName.txt")).file(), false
-
-                    )) {
 
 
-                        writer.write("");
-                        writer.flush();
-                    } catch (IOException ex) {
-                        delrep = false;
-                    }
-                    try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
-                        try (FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/reportOnName.txt")).file(), true
-                        )) {
+                    if (Objects.equals(reportString.getText(), "")) {
+
+
+
+                        rownum = 1;
+                        row = sheet.createRow(rownum);
+
+                        cell = row.createCell(0, CellType.STRING);
+                        cell.setCellValue("Ученик");
+
+                        cell = row.createCell(1, CellType.STRING);
+                        cell.setCellValue("Класс");
+
+                        cell = row.createCell(2, CellType.STRING);
+                        cell.setCellValue("Операция");
+
+                        cell = row.createCell(3, CellType.NUMERIC);
+                        cell.setCellValue("Дата");
+
+                        cell = row.createCell(4, CellType.NUMERIC);
+                        cell.setCellValue("Книга");
+
+                        cell = row.createCell(5, CellType.NUMERIC);
+                        cell.setCellValue("Автор");
+
+                        try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
+
+                            // читаем посимвольно
                             int c;
-                            String s = "";
-
+                            String str = "";
                             while ((c = reader.read()) != -1) {
 
-                                s += ((char) c);
+                                str += (char) c;
                             }
-                            bookReportInt = 0;
-                            for (String s1 : s.split("\n")) {
 
-                                if (s1.contains(reportName)) {
-                                    // запись всей строки
-                                    text = s1;
-                                    writer.write(text);
-                                    // запись по символам
-                                    writer.append('\n');
 
-                                    if (s1.contains("выдана")) {
-                                        bookReportInt++;
+                            for (String s : str.split("\n")) {
+
+if (s.contains(reportName)){
+    rownum++;
+    row = sheet.createRow(rownum);
+
+                                if (s.contains("книга удалена")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("Удаление книги");
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("книга удалена")[1]).split("///")[0]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("книга удалена")[1]).split("///")[1]);
+                                } else if (s.contains("новая книга")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("добаавлена книга");
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая книга")[1]).split("///")[0]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая книга")[1]).split("///")[1]);
+
+                                    cell = row.createCell(6, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("в количестве")[1]));
+
+                                } else if (s.contains("новая персона")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue(" новый читатель");
+
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая персона")[1]).split("///")[0]);
+                                    if ((s.split("новая персона")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("новая персона")[1]).split("///")[1]);
                                     }
-                                }
+                                } else if (s.contains("читатель удален из системы")) {
 
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("читатель удален");
 
-                            }
-                            if (reportYearsName.getSelectedIndex() == 11) {
-                                getBookByName(reportYearsName.getSelectedIndex() + 1, reportNameName.getSelected().toString(), "a");
-                            } else {
-                                getBookByName(reportYearsName.getSelectedIndex() + 1, reportNameName.getSelected().toString(), reportCharName.getSelected().toString());
-                            }
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[0]);
 
-                            // запись всей строки
-                            text = "--------------------итог--------------------";
-                            writer.write(text);
-                            // запись по символам
-                            writer.append('\n');
+                                    if ((s.split("читатель удален из системы")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
 
-
-                            if (bookReturnArrayList.size() != 0) {
-                                text = "не вернул книги:";
-                                writer.write(text);
-                                writer.append('\n');
-                                for (int i = 0; i < bookReturnArrayList.size(); i++) {
-                                    text = bookReturnArrayList.get(i);
-                                    writer.write(text);
-                                    writer.append('\n');
-                                }
-                            } else {
-                                text = " вернул все книги:";
-                                writer.write(text);
-                                writer.append('\n');
-                            }
-
-                            writer.append('\n');
-                            writer.append('\n');
-
-                            text = " книг взято за все время:" + bookReportInt;
-                            writer.write(text);
-                            // запись по символам
-                            writer.append('\n');
-                            text = " книг на руках:" + bookReturnArrayList.size();
-                            writer.write(text);
-                            // запись по символам
-                            writer.append('\n');
-
-
-                            writer.flush();
-                            if (Objects.equals(reportString.getText(), "")) {
-                                try {
-                                    (Gdx.files.external("/.prefs/Library/reportOnName.txt")).copyTo(Gdx.files.external("/Downloads/отчет " + reportName + ".txt"));
-                                    pathReport = Gdx.files.external("/Downloads/отчет " + reportName + ".txt").file().getAbsolutePath();
-                                } catch (Exception e) {
-                                    delrep = false;
-                                }
-
-                            } else {
-                                if (Gdx.files.absolute(reportString.getText()).exists()) {
-                                    try {
-                                        (Gdx.files.external("/.prefs/Library/reportOnName.txt")).copyTo(Gdx.files.absolute(reportString.getText() + "/отчет " + reportName + ".txt"));
-                                        pathReport = Gdx.files.absolute(reportString.getText() + "/отчет " + reportName + ".txt").file().getAbsolutePath();
-                                    } catch (Exception e) {
-                                        delrep = false;
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[1]);
                                     }
+                                } else if (s.contains("выдана")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                                    if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга выдана");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                                } else if (s.contains("вернул")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                                    if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга возвращена");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
                                 } else {
-                                    reportString.setText(null);
-                                    reportString.setMessageText("такого пути не существует");
+                                    System.out.println(s);
                                 }
+                                cell = row.createCell(3, CellType.NUMERIC);
+                                cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
                             }
+                            }
+
+                            File file =(Gdx.files.external("/Downloads/"+reportName.split("///")[0]+" " +reportName.split("///")[1]+" cтатистика до " + (new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2] + ".xlsx").file());
+                            file.getParentFile().mkdirs();
+
+                            FileOutputStream outFile = new FileOutputStream(file);
+                            workbook.write(outFile);
 
 
                         } catch (IOException ex) {
+                            try(FileWriter writer = new FileWriter("notes3.txt", false))
+                        {
+                            // запись всей строки
+                            String text = ex.toString();
+                            writer.write(text);
+
+                            writer.flush();
+                        }
+                        catch(IOException eex){
+
+                            System.out.println(eex.getMessage());
+                        }
                             delrep = false;
                         }
-                    } catch (IOException ex) {
-                        delrep = false;
+
+
+                    } else if (Gdx.files.absolute(reportString.getText()).exists()) {
+
+
+                        rownum = 1;
+                        row = sheet.createRow(rownum);
+
+                        cell = row.createCell(0, CellType.STRING);
+                        cell.setCellValue("Ученик");
+
+                        cell = row.createCell(1, CellType.STRING);
+                        cell.setCellValue("Класс");
+
+                        cell = row.createCell(2, CellType.STRING);
+                        cell.setCellValue("Операция");
+
+                        cell = row.createCell(3, CellType.NUMERIC);
+                        cell.setCellValue("Дата");
+
+                        cell = row.createCell(4, CellType.NUMERIC);
+                        cell.setCellValue("Книга");
+
+                        cell = row.createCell(5, CellType.NUMERIC);
+                        cell.setCellValue("Автор");
+
+                        try (FileReader reader = new FileReader((Gdx.files.external("/.prefs/Library/report.txt")).file())) {
+
+                            // читаем посимвольно
+                            int c;
+                            String str = "";
+                            while ((c = reader.read()) != -1) {
+
+                                str += (char) c;
+                            }
+
+
+                            for (String s : str.split("\n")) {
+                                if (s.contains(reportName)){
+                                    rownum++;
+                                    row = sheet.createRow(rownum);
+                                if (s.contains("книга удалена")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("Удаление книги");
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("книга удалена")[1]).split("///")[0]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("книга удалена")[1]).split("///")[1]);
+                                } else if (s.contains("новая книга")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("добаавлена книга");
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая книга")[1]).split("///")[0]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая книга")[1]).split("///")[1]);
+
+                                    cell = row.createCell(6, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("в количестве")[1]));
+
+                                } else if (s.contains("новая персона")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue(" новый читатель");
+
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("новая персона")[1]).split("///")[0]);
+                                    if ((s.split("новая персона")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("новая персона")[1]).split("///")[1]);
+                                    }
+                                } else if (s.contains("читатель удален из системы")) {
+
+                                    cell = row.createCell(2, CellType.STRING);
+                                    cell.setCellValue("читатель удален");
+
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[0]);
+
+                                    if ((s.split("читатель удален из системы")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("читатель удален из системы")[1]).split("///")[1]);
+                                    }
+                                } else if (s.contains("выдана")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[1]).split("///")[0]);
+
+                                    if ((s.split("выдана")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("выдана")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга выдана");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("выдана")[0]).split("книга:")[1].split("///")[0]);
+
+                                } else if (s.contains("вернул")) {
+                                    cell = row.createCell(0, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[1]).split("///")[0]);
+
+                                    if ((s.split("вернул")[1]).split("///")[1].contains("сотрудник")) {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue("сотрудник");
+
+                                    } else {
+                                        cell = row.createCell(1, CellType.NUMERIC);
+                                        cell.setCellValue((s.split("вернул")[1]).split("///")[1]);
+                                    }
+
+                                    cell = row.createCell(2, CellType.NUMERIC);
+                                    cell.setCellValue("книга возвращена");
+
+
+                                    cell = row.createCell(4, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[1]);
+
+                                    cell = row.createCell(5, CellType.NUMERIC);
+                                    cell.setCellValue((s.split("вернул")[0]).split("книгу:")[1].split("///")[0]);
+                                } else {
+
+                                }
+                                cell = row.createCell(3, CellType.NUMERIC);
+                                cell.setCellValue((s.split(String.valueOf(GregorianCalendar.YEAR))[0]));
+
+                            }}
+                            File file = (Gdx.files.absolute(reportString.getText() +"/"+reportName.split("///")[0]+" " +reportName.split("///")[1]+" cтатистика до "  + (new GregorianCalendar()).getTime().toString().split(":")[0]+" "+(new GregorianCalendar()).getTime().toString().split(":")[1]+" "+(new GregorianCalendar()).getTime().toString().split(":")[2]+ ".xlsx").file());
+                            file.getParentFile().mkdirs();
+
+                            FileOutputStream outFile = new FileOutputStream(file);
+                            workbook.write(outFile);
+
+                        } catch (IOException ex) {
+                            System.out.println(ex);
+
+                            delrep = false;
+                        }
+
+
+                    } else {
+                        reportString.setText(null);
+                        reportString.setMessageText("такого пути не существует");
                     }
+
+
                     if (delrep) {
                         reportСompleted.setText("отчет успешно сохранен\n" +
                                 pathReport);
@@ -1674,8 +2641,8 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 } else {
                     reportСompleted.setText("укажите, на кого сделать отчет");
                 }
-            }
-        });
+
+            }});
         reportNull.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent changeEvent, Actor actor) {
@@ -1973,40 +2940,40 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
     }
 
 
-    public boolean  chekNoNormalName(String name){
+    public boolean chekNoNormalName(String name) {
         if (
-                name.contains("q")||name.contains("w")||name.contains("e")||name.contains("r")||name.contains("t")||name.contains("y")||
-                        name.contains("u")||name.contains("i")||name.contains("o")||name.contains("p")||name.contains("a")||name.contains("s")||
-                        name.contains("d")||name.contains("f")||name.contains("g")||name.contains("h")||name.contains("j")||name.contains("k")||
-                        name.contains("l")||name.contains("z")||name.contains("x")||name.contains("c")||name.contains("v")||name.contains("b")||
-                        name.contains("n")||name.contains("m")||name.contains("Q")||name.contains("W")||name.contains("E")||name.contains("R")||
-                        name.contains("T")||name.contains("Y")||name.contains("U")||name.contains("I")||name.contains("O")||name.contains("P")||
-                        name.contains("A")||name.contains("S")||name.contains("D")||name.contains("F")||name.contains("G")||name.contains("H")||
-                        name.contains("J")||name.contains("K")||name.contains("L")||name.contains("Z")||name.contains("X")||name.contains("C")||
-                        name.contains("V")||name.contains("B")||name.contains("N")||name.contains("M")||name.contains("Й")||name.contains("Ц")||
-                        name.contains("У")||name.contains("К")||name.contains("Е")||name.contains("Н")||name.contains("Г")||name.contains("Ш")||
-                        name.contains("Щ")||name.contains("З")||name.contains("Х")||name.contains("Ъ")||name.contains("Ф")||name.contains("Ы")||
-                        name.contains("Л")||name.contains("О")||name.contains("Р")||name.contains("П")||name.contains("А")||name.contains("В")||
-                        name.contains("Д")||name.contains("Ж")||name.contains("Э")||name.contains("Ю")||name.contains("Б")||name.contains("Ь")||
-                        name.contains("Я")||name.contains("Ч")||name.contains("С")||name.contains("М")||name.contains("И")||name.contains("Т")||
-                        name.contains("я")||name.contains("б")||name.contains("й")||name.contains("ц")||name.contains("-")||name.contains("1")||
-                        name.contains("ч")||name.contains("ю")||name.contains("ф")||name.contains("у")||name.contains("Ё")||name.contains("2")||
-                        name.contains("с")||name.contains("э")||name.contains("ы")||name.contains("к")||name.contains("ё")||name.contains("3")||
-                        name.contains("м")||name.contains("ж")||name.contains("в")||name.contains("е")||name.contains("ъ")||name.contains("4")||
-                        name.contains("и")||name.contains("д")||name.contains("а")||name.contains("н")||name.contains("х")||name.contains("5")||
-                        name.contains("т")||name.contains("л")||name.contains("п")||name.contains("г")||name.contains("з")||name.contains("6")||
-                        name.contains("ь")||name.contains("о")||name.contains("р")||name.contains("ш")||name.contains("щ")||name.contains("7")||
-                        name.contains("8")||name.contains("9")
+                name.contains("q") || name.contains("w") || name.contains("e") || name.contains("r") || name.contains("t") || name.contains("y") ||
+                        name.contains("u") || name.contains("i") || name.contains("o") || name.contains("p") || name.contains("a") || name.contains("s") ||
+                        name.contains("d") || name.contains("f") || name.contains("g") || name.contains("h") || name.contains("j") || name.contains("k") ||
+                        name.contains("l") || name.contains("z") || name.contains("x") || name.contains("c") || name.contains("v") || name.contains("b") ||
+                        name.contains("n") || name.contains("m") || name.contains("Q") || name.contains("W") || name.contains("E") || name.contains("R") ||
+                        name.contains("T") || name.contains("Y") || name.contains("U") || name.contains("I") || name.contains("O") || name.contains("P") ||
+                        name.contains("A") || name.contains("S") || name.contains("D") || name.contains("F") || name.contains("G") || name.contains("H") ||
+                        name.contains("J") || name.contains("K") || name.contains("L") || name.contains("Z") || name.contains("X") || name.contains("C") ||
+                        name.contains("V") || name.contains("B") || name.contains("N") || name.contains("M") || name.contains("Й") || name.contains("Ц") ||
+                        name.contains("У") || name.contains("К") || name.contains("Е") || name.contains("Н") || name.contains("Г") || name.contains("Ш") ||
+                        name.contains("Щ") || name.contains("З") || name.contains("Х") || name.contains("Ъ") || name.contains("Ф") || name.contains("Ы") ||
+                        name.contains("Л") || name.contains("О") || name.contains("Р") || name.contains("П") || name.contains("А") || name.contains("В") ||
+                        name.contains("Д") || name.contains("Ж") || name.contains("Э") || name.contains("Ю") || name.contains("Б") || name.contains("Ь") ||
+                        name.contains("Я") || name.contains("Ч") || name.contains("С") || name.contains("М") || name.contains("И") || name.contains("Т") ||
+                        name.contains("я") || name.contains("б") || name.contains("й") || name.contains("ц") || name.contains("-") || name.contains("1") ||
+                        name.contains("ч") || name.contains("ю") || name.contains("ф") || name.contains("у") || name.contains("Ё") || name.contains("2") ||
+                        name.contains("с") || name.contains("э") || name.contains("ы") || name.contains("к") || name.contains("ё") || name.contains("3") ||
+                        name.contains("м") || name.contains("ж") || name.contains("в") || name.contains("е") || name.contains("ъ") || name.contains("4") ||
+                        name.contains("и") || name.contains("д") || name.contains("а") || name.contains("н") || name.contains("х") || name.contains("5") ||
+                        name.contains("т") || name.contains("л") || name.contains("п") || name.contains("г") || name.contains("з") || name.contains("6") ||
+                        name.contains("ь") || name.contains("о") || name.contains("р") || name.contains("ш") || name.contains("щ") || name.contains("7") ||
+                        name.contains("8") || name.contains("9")
 
-        ){
+        ) {
             return false;
-        }else {
+        } else {
             return true;
         }
 
     }
 
-   public void newBookMenu() {
+    public void newBookMenu() {
         newBookTable.setFillParent(true);
         newBookTable.setPosition(0, 50);
         addNewBookTable.setFillParent(true);
@@ -2063,7 +3030,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 noError = true;
 
                 addNewBookTable.clear();
-                if (chekNoNormalName(nameBook.getText())||chekNoNormalName(author.getText())){
+                if (chekNoNormalName(nameBook.getText()) || chekNoNormalName(author.getText())) {
                     noError = false;
                     error = new Label("автор или название не имеет букв", skinTree);
                     addNewBookTable.add(number).pad(0, 0, 0, 50);
@@ -2163,8 +3130,8 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                         }
                     }
 
-                    logNewString((new GregorianCalendar()).getTime() + " новая книга " + nameBook.getText() + " " +
-                            author.getText() + " " + genre.getSelected() + " в количестве" + Integer.parseInt(number.getText()) + " штук");
+                    logNewString((new GregorianCalendar()).getTime() + " новая книга " + nameBook.getText() + "///" +
+                            author.getText() + "///" + genre.getSelected() + " в количестве" + Integer.parseInt(number.getText()) + " штук");
                     for (int i = 0; i < Integer.parseInt(number.getText()); i++) {
                         bookArrayList.add(new Book(nameBook.getText(), author.getText(),
                                 (String) genre.getSelected(), descriptionString, coverBook));
@@ -2239,7 +3206,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
 
 
                     if (((book.reader.equals(readersArrayList.get(i))) &&
-                            (book.dataOfGiven.getTimeInMillis() + 1.21e+9 < nowData.getTimeInMillis())&&(!book.genre.equals(" Учебники")||((book.dataOfGiven.getTimeInMillis() + 5.256e+9 < nowData.getTimeInMillis())&&((nowData.getTime().getMonth()== Calendar.JULY||(nowData.getTime().getMonth()== Calendar.JUNE)||(nowData.getTime().getMonth()== Calendar.AUGUST))))||(book.dataOfGiven.getTimeInMillis() + 2.628e+10 < nowData.getTimeInMillis())))
+                            (book.dataOfGiven.getTimeInMillis() + 1.21e+9 < nowData.getTimeInMillis()) && (!book.genre.equals(" Учебники") || ((book.dataOfGiven.getTimeInMillis() + 5.256e+9 < nowData.getTimeInMillis()) && ((nowData.getTime().getMonth() == Calendar.JULY || (nowData.getTime().getMonth() == Calendar.JUNE) || (nowData.getTime().getMonth() == Calendar.AUGUST)))) || (book.dataOfGiven.getTimeInMillis() + 2.628e+10 < nowData.getTimeInMillis())))
                     ) {
 
                         if (readersArrayList.get(i).yearsLern >= 12) {
@@ -2304,13 +3271,13 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
             if (bookArrayList.get(i).dataOfGiven != null) {
                 bookExclusive = true;
             }
-           if (!bookArrayList.get(i).name.contains(nameBookSearch.getText()) &&(!Objects.equals(nameBookSearch.getText(), ""))){
-               bookExclusive = false;
-            }
-            if (!(genreSearch.getSelected().toString().contains(bookArrayList.get(i).genre)) &&(genreSearch.getSelectedIndex()!=0)){
+            if (!bookArrayList.get(i).name.contains(nameBookSearch.getText()) && (!Objects.equals(nameBookSearch.getText(), ""))) {
                 bookExclusive = false;
             }
-            if (!(bookArrayList.get(i).author.contains(authorSearch.getSelected().toString())) &&(authorSearch.getSelectedIndex()!=0)){
+            if (!(genreSearch.getSelected().toString().contains(bookArrayList.get(i).genre)) && (genreSearch.getSelectedIndex() != 0)) {
+                bookExclusive = false;
+            }
+            if (!(bookArrayList.get(i).author.contains(authorSearch.getSelected().toString())) && (authorSearch.getSelectedIndex() != 0)) {
                 bookExclusive = false;
             }
             if (bookExclusive) {
@@ -2438,13 +3405,13 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                 bookExclusive = true;
 
             }
-            if (!bookArrayList.get(i).name.contains(nameBookSearch.getText()) &&(!Objects.equals(nameBookSearch.getText(), ""))){
+            if (!bookArrayList.get(i).name.contains(nameBookSearch.getText()) && (!Objects.equals(nameBookSearch.getText(), ""))) {
                 bookExclusive = false;
             }
-            if (!(genreSearch.getSelected().toString().contains(bookArrayList.get(i).genre)) &&(genreSearch.getSelectedIndex()!=0)){
+            if (!(genreSearch.getSelected().toString().contains(bookArrayList.get(i).genre)) && (genreSearch.getSelectedIndex() != 0)) {
                 bookExclusive = false;
             }
-            if (!(bookArrayList.get(i).author.contains(authorSearch.getSelected().toString())) &&(authorSearch.getSelectedIndex()!=0)){
+            if (!(bookArrayList.get(i).author.contains(authorSearch.getSelected().toString())) && (authorSearch.getSelectedIndex() != 0)) {
                 bookExclusive = false;
             }
 
@@ -2650,7 +3617,7 @@ if (book.name.equals(reportNameBook.getSelected().toString())&&book.author.equal
                             if (item != null) {
                                 if (item.getName().equals(lastButtonName)) {
                                     item.setColor(Color.WHITE);
-break;
+                                    break;
                                 }
                             }
                         }
@@ -2661,12 +3628,12 @@ break;
                             if ((bookArrayList.get(i).name + bookArrayList.get(i).author + bookArrayList.get(i).genre).equals(actor.getName())) {
                                 index = i;
 
-if (!chooseObject) {
-    actor.setColor(Color.RED);
-    lastButtonName = actor.getName();
-    readerThisBookUpdate(bookArrayList.get(i));
-    chooseObject = true;
-}
+                                if (!chooseObject) {
+                                    actor.setColor(Color.RED);
+                                    lastButtonName = actor.getName();
+                                    readerThisBookUpdate(bookArrayList.get(i));
+                                    chooseObject = true;
+                                }
                                 bookNumber++;
                                 if (bookArrayList.get(i).dataOfGiven == null) {
                                     bookNumberOfHend++;
@@ -2754,17 +3721,17 @@ if (!chooseObject) {
         for (int i = 0; i < readersArrayList.size(); i++) {
 
 
-
-            if(readersArrayList.get(i).yearsLern>12 ){
-                readersArrayList.get(i).yearsLern=12;
-            };
+            if (readersArrayList.get(i).yearsLern > 12) {
+                readersArrayList.get(i).yearsLern = 12;
+            }
+            ;
 
             if (((nameReaderSearch.getText().equals("")) || (readersArrayList.get(i).name.contains(nameReaderSearch.getText())))
                     && ((surnameReaderSearch.getText().equals("")) || (readersArrayList.get(i).surname.contains(surnameReaderSearch.getText())))
                     && ((yearsSearch.getSelectedIndex() == 0) || (((readersArrayList.get(i).yearsLern + " класс").equals(yearsSearch.getSelected()) && (readersArrayList.get(i).yearsLern < 12)) || (((" Сотрудник").equals(yearsSearch.getSelected()))) && (readersArrayList.get(i).yearsLern > 11)))
                     && ((yearsCharSearch.getSelectedIndex() == 0) || (readersArrayList.get(i).charClass.equals(yearsCharSearch.getSelected())))) {
 
-                if (readersArrayList.get(i).yearsLern >= 12&&(yearsCharSearch.getSelectedIndex()==0)) {
+                if (readersArrayList.get(i).yearsLern >= 12 && (yearsCharSearch.getSelectedIndex() == 0)) {
                     newReaderAdded = new TextButton(readersArrayList.get(i).surname + " " + readersArrayList.get(i).name + " Cотрудник", skinTree, "textbuttonlist");
 
                 } else {
@@ -2905,8 +3872,8 @@ if (!chooseObject) {
                 surnameReader.setColor(Color.WHITE);
                 patronymicReader.setColor(Color.WHITE);
 
-                if ((nameReader.getText().equals("")) || (surnameReader.getText().equals("")) || (patronymicReader.getText().equals(""))||(chekNoNormalName(nameReader.getText())||chekNoNormalName(surnameReader.getText())||chekNoNormalName(patronymicReader.getText()))) {
-                    errorNewReader.setText(  " Заполните обязательные поля");
+                if ((nameReader.getText().equals("")) || (surnameReader.getText().equals("")) || (patronymicReader.getText().equals("")) || (chekNoNormalName(nameReader.getText()) || chekNoNormalName(surnameReader.getText()) || chekNoNormalName(patronymicReader.getText()))) {
+                    errorNewReader.setText(" Заполните обязательные поля");
                     if ((nameReader.getText().equals(""))) {
                         nameReader.setColor(Color.RED);
                     }
@@ -2919,7 +3886,7 @@ if (!chooseObject) {
                     System.out.println(chekNoNormalName(nameReader.getText()));
                     System.out.println(chekNoNormalName(surnameReader.getText()));
                     System.out.println(chekNoNormalName(patronymicReader.getText()));
-                    if (chekNoNormalName(nameReader.getText())||chekNoNormalName(surnameReader.getText())||chekNoNormalName(patronymicReader.getText())){
+                    if (chekNoNormalName(nameReader.getText()) || chekNoNormalName(surnameReader.getText()) || chekNoNormalName(patronymicReader.getText())) {
 
                         errorNewReader.setText("фио не имеет букв");
 
@@ -2933,21 +3900,21 @@ if (!chooseObject) {
                         readersArrayList.add(new Readers(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, "a"));
                         Library.saveNewReader(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, "a");
                         if (classReader.getSelectedIndex() > 10) {
-                            logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + " сотрудник");
+                            logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + "///сотрудник");
 
                         } else {
-                            logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + " " + classReader.getSelectedIndex() + 1 + " " + "a");
+                            logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + "///" + classReader.getSelectedIndex() + 1 + " " + "a");
                         }
-                    } else
+                    } else{
                         readersArrayList.add(new Readers(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, charClass.getText()));
                     Library.saveNewReader(nameReader.getText(), surnameReader.getText(), patronymicReader.getText(), classReader.getSelectedIndex() + 1, charClass.getText());
 
                     if (classReader.getSelectedIndex() > 10) {
-                        logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + " сотрудник");
+                        logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + "///сотрудник");
 
                     } else {
-                        logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + " " + classReader.getSelectedIndex() + 1 + " " + charClass.getText());
-                    }
+                        logNewString((new GregorianCalendar()).getTime() + " новая персона " + surnameReader.getText() + " " + nameReader.getText() + "///" + classReader.getSelectedIndex() + 1 + " " + charClass.getText());
+                    }}
                     newReaderTable.clear();
                     newReaderTable.add(surnameReader).size(350, 30).pad(2).row();
                     newReaderTable.add(nameReader).size(350, 30).pad(2).row();
@@ -2990,7 +3957,7 @@ if (!chooseObject) {
         giveBookButtonTable.setFillParent(true);
         giveBookButtonTable.setPosition(0, -Gdx.graphics.getHeight() / 4);
         giveBookButton = new TextButton("Выдать книгу", skinTree);
-        giveBookKlassButton = new TextButton(" Выдать книгу всему классу " , skinTree);
+        giveBookKlassButton = new TextButton(" Выдать книгу всему классу ", skinTree);
         giveBookButtonTable.add(giveBookButton).pad(10);
         giveBookButtonTable.add(giveBookKlassButton);
         erorTextField = new TextField("", skinTree);
@@ -3004,75 +3971,77 @@ if (!chooseObject) {
                 erorTextField.setWidth(35);
                 if ((bookOnGivMenuTable.getRows() == 3) && (readersOnGivMenuTable.getRows() >= 2)) {
                     for (Readers value : readersArrayList) {
-                        bookDetected=false;
-                      if(  (""+ value.yearsLern).equals("" +
-                                        (int) (classOfReadersOnGivMenuSelectBox.getSelectedIndex() + 1))) {
+                        bookDetected = false;
+                        if (("" + value.yearsLern).equals("" +
+                                (int) (classOfReadersOnGivMenuSelectBox.getSelectedIndex() + 1))) {
 
-if (erorTextField.getWidth()==35){
-                          for (Book book : bookArrayList) {
+                            if (erorTextField.getWidth() == 35) {
+                                for (Book book : bookArrayList) {
 
-                              if ((book.author.equals(authorOfBookOnGivMenuSelectBox.getSelected())) &&
-                                      (book.name.equals(nameOfBookOnGivMenuSelectBox.getSelected())) &&
-                                      (book.genre.equals(genreOfBookOnGivMenuSelectBox.getSelected())) &&
-                                      (book.dataOfGiven == null)) {
-
-
-                                  if (classOfReadersOnGivMenuSelectBox.getSelectedIndex() > 10) {
-
-                                          book.giveBook(value);
-                                          bookOnHendNumberInt++;
-                                          if (value.yearsLern > 11) {
-                                              logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " сотрудник");
-
-                                          } else {
-                                              logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " " + value.yearsLern + " " + value.charClass);
-                                          }
-
-                                          Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
-                                                  , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
-
-                                          bookDetected = true;
-                                         break;
-
-                                  } else if (("" + value.charClass).equals((String) charClassGivMenu.getSelected())) {
-                                      book.giveBook(value);
-                                      bookOnHendNumberInt++;
-                                      if (value.yearsLern > 11) {
-                                          logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " сотрудник");
-
-                                      } else {
-                                          logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " " + value.yearsLern + " " + value.charClass);
-
-                                      }
-
-                                      Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
-                                              , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
-
-                                      bookDetected = true;
-                                      break;
-                                  }
-                              }
-                          }}
-
-                          if (!bookDetected) {
-if (erorTextField.getText().length()<90) {
-    if (erorTextField.getText().length()==27){
-        erorTextField.setText(erorTextField.getText() + value.surname + " " + value.name );
-
-    }else {
-        erorTextField.setText(erorTextField.getText()+", " + value.surname + " " + value.name );
-
-    }
-    erorTextField.setColor(Color.RED);
-    erorTextField.setWidth(1335);
-    erorTextField.setPosition(Gdx.graphics.getWidth() / 2 - erorTextField.getWidth() / 2, 20);
-    stage.addActor(erorTextField);
-}  }
+                                    if ((book.author.equals(authorOfBookOnGivMenuSelectBox.getSelected())) &&
+                                            (book.name.equals(nameOfBookOnGivMenuSelectBox.getSelected())) &&
+                                            (book.genre.equals(genreOfBookOnGivMenuSelectBox.getSelected())) &&
+                                            (book.dataOfGiven == null)) {
 
 
+                                        if (classOfReadersOnGivMenuSelectBox.getSelectedIndex() > 10) {
 
-                      }
-                      } if (erorTextField.getWidth()!=1335){
+                                            book.giveBook(value);
+                                            bookOnHendNumberInt++;
+                                            if (value.yearsLern > 11) {
+                                                logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///сотрудник");
+
+                                            } else {
+                                                logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///" + value.yearsLern + " " + value.charClass);
+                                            }
+
+                                            Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
+                                                    , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
+
+                                            bookDetected = true;
+                                            break;
+
+                                        } else if (("" + value.charClass).equals((String) charClassGivMenu.getSelected())) {
+                                            book.giveBook(value);
+                                            bookOnHendNumberInt++;
+                                            if (value.yearsLern > 11) {
+                                                logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///сотрудник");
+
+                                            } else {
+                                                logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///" + value.yearsLern + " " + value.charClass);
+
+                                            }
+
+                                            Library.saveBookGiver(bookArrayList.indexOf(book), book.dataOfGiven.getWeekYear(), book.dataOfGiven.getTime().getMonth()
+                                                    , book.dataOfGiven.getTime().getDate(), value.name, value.surname, value.patronymic, value.yearsLern, value.charClass);
+
+                                            bookDetected = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!bookDetected) {
+                                if (erorTextField.getText().length() < 90) {
+                                    if (erorTextField.getText().length() == 27) {
+                                        erorTextField.setText(erorTextField.getText() + value.surname + " " + value.name);
+
+                                    } else {
+                                        erorTextField.setText(erorTextField.getText() + ", " + value.surname + " " + value.name);
+
+                                    }
+                                    erorTextField.setColor(Color.RED);
+                                    erorTextField.setWidth(1335);
+                                    erorTextField.setPosition(Gdx.graphics.getWidth() / 2 - erorTextField.getWidth() / 2, 20);
+                                    stage.addActor(erorTextField);
+                                }
+                            }
+
+
+                        }
+                    }
+                    if (erorTextField.getWidth() != 1335) {
                         stage.clear();
                         meinMenuUsed();
                         stage.addActor(mainMenuTable);
@@ -3095,7 +4064,7 @@ if (erorTextField.getText().length()<90) {
                         bookOnLibrary.setText(" " + (numberOfBook - bookOnHendNumberInt));
                         bookOnHendNumber.setText(" " + bookOnHendNumberInt);
                         allBookOnMyHendListUpdate();
-                    }else {
+                    } else {
                         stage.clear();
                         meinMenuUsed();
                         stage.addActor(mainMenuTable);
@@ -3118,13 +4087,12 @@ if (erorTextField.getText().length()<90) {
                         bookOnLibrary.setText(" " + (numberOfBook - bookOnHendNumberInt));
                         bookOnHendNumber.setText(" " + bookOnHendNumberInt);
                         allBookOnMyHendListUpdate();
-                        stage.addActor(erorTextField);}
-                    if ( (erorTextField.getText().length()>=90)){
+                        stage.addActor(erorTextField);
+                    }
+                    if ((erorTextField.getText().length() >= 90)) {
                         erorTextField.setText(erorTextField.getText() + "и др. ");
 
                     }
-
-
 
 
                 } else {
@@ -3143,7 +4111,6 @@ if (erorTextField.getText().length()<90) {
 
             }
         });
-
 
 
         giveBookButton.addListener(new ChangeListener() {
@@ -3165,10 +4132,10 @@ if (erorTextField.getText().length()<90) {
                                                     (int) (classOfReadersOnGivMenuSelectBox.getSelectedIndex() + 1))) {
                                         book.giveBook(value);
                                         if (value.yearsLern > 11) {
-                                            logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " сотрудник");
+                                            logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///сотрудник");
 
                                         } else {
-                                            logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " " + value.yearsLern + " " + value.charClass);
+                                            logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///" + value.yearsLern + " " + value.charClass);
 
                                         }
 
@@ -3184,10 +4151,10 @@ if (erorTextField.getText().length()<90) {
                                                 (int) (classOfReadersOnGivMenuSelectBox.getSelectedIndex() + 1))) {
                                     book.giveBook(value);
                                     if (value.yearsLern > 11) {
-                                        logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " сотрудник");
+                                        logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///сотрудник");
 
                                     } else {
-                                        logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + " " + book.name + " выдана " + value.surname + " " + value.name + " " + value.yearsLern + " " + value.charClass);
+                                        logNewString((new GregorianCalendar()).getTime() + " книга:" + book.author + "///" + book.name + " выдана " + value.surname + " " + value.name + "///" + value.yearsLern + " " + value.charClass);
 
                                     }
 
@@ -3536,10 +4503,10 @@ if (erorTextField.getText().length()<90) {
 
                             if ((((book.author + " " + book.name).equals(bookOnReturnMenuSelectBox.getSelected()))) && (book.giveThisReader(reader))) {
                                 if (reader.yearsLern > 11) {
-                                    logNewString((new GregorianCalendar()).getTime() + " книгу:" + book.author + " " + book.name + " вернул " + reader.surname + " " + reader.name + " сотрудник");
+                                    logNewString((new GregorianCalendar()).getTime() + " книгу:" + book.author + "///" + book.name + " вернул " + reader.surname + " " + reader.name + "///сотрудник");
 
                                 } else {
-                                    logNewString((new GregorianCalendar()).getTime() + " книгу:" + book.author + " " + book.name + " вернул " + reader.surname + " " + reader.name + " " + reader.yearsLern + " " + reader.charClass);
+                                    logNewString((new GregorianCalendar()).getTime() + " книгу:" + book.author + "///" + book.name + " вернул " + reader.surname + " " + reader.name + "///" + reader.yearsLern + " " + reader.charClass);
                                 }
 
                                 stage.clear();
