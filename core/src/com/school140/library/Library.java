@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class Library extends ApplicationAdapter {
     SpriteBatch batch;
-    float startLogo = 1000;
+    float startLogo = 0;
     static int allBook;
     static Screen screen;
 Boolean save=true;
@@ -26,10 +26,11 @@ Boolean save=true;
     static Preferences pref;
     static Preferences prefBackup;
     private int timerResize = 0;
-
+    static Boolean saveGo=false;
+    static Save mThing ;
+    static Thread myThready;
     @Override
     public void create() {
-
         pref = Gdx.app.getPreferences("LibrarySave");
 
         prefBackup = Gdx.app.getPreferences("LibrarySaveBackup");
@@ -56,26 +57,31 @@ Boolean save=true;
         }
 
         for (int i = 0; i < pref.getInteger("readerLength", 0); i++) {
-
-            Screen.readersArrayList.add(new Readers(
-                    pref.getString("name" + i),
-                    pref.getString("surname" + i),
-                    pref.getString("patronymic" + i),
-                    pref.getInteger("yearsLern" + i),
-                    pref.getString("charClass" + i)));
-
+if (!(screen.chekNoNormalName(pref.getString("name" + i))||screen.chekNoNormalName(pref.getString("surname" + i))
+        ||screen.chekNoNormalName(pref.getString("patronymic" + i)))) {
+    Screen.readersArrayList.add(new Readers(
+            pref.getString("name" + i),
+            pref.getString("surname" + i),
+            pref.getString("patronymic" + i),
+            pref.getInteger("yearsLern" + i),
+            pref.getString("charClass" + i)));
+}else {
+    System.out.println(pref.getString("name" + i)+
+            pref.getString("surname" + i));
+}
         }
 
         for (int i = 0; i < pref.getInteger("bookNumber", 0); i++) {
 
-
-            Screen.bookArrayList.add(new Book(
-                    pref.getString("bookName" + i),
-                    pref.getString("bookAuthor" + i),
-                    pref.getString("bookGenre" + i),
-                    pref.getString("bookDescription" + i)
-                    , pref.getString("bookCover" + i)
-            ));
+            if (!(screen.chekNoNormalName(pref.getString("bookName" + i)) || screen.chekNoNormalName(pref.getString("bookAuthor" + i))
+                    || screen.chekNoNormalName(pref.getString("bookGenre" + i)))) {
+                Screen.bookArrayList.add(new Book(
+                        pref.getString("bookName" + i),
+                        pref.getString("bookAuthor" + i),
+                        pref.getString("bookGenre" + i),
+                        pref.getString("bookDescription" + i)
+                        , pref.getString("bookCover" + i)
+                ));
 
 
             if (pref.getBoolean("bookGiven" + i)) {
@@ -89,12 +95,12 @@ Boolean save=true;
                                     (readers.yearsLern == (pref.getInteger("bookReaderYearsLern" + i))) &&
                                     (readers.charClass.equals(pref.getString("bookReaderCharClass" + i)))
                     ) {
-                        Screen.bookArrayList.get(i).reader = readers;
+                        Screen.bookArrayList.get(i-(int)startLogo).reader = readers;
 
 
                     }
                 }
-                Screen.bookArrayList.get(i).dataOfGiven = new GregorianCalendar(
+                Screen.bookArrayList.get(i-(int)startLogo).dataOfGiven = new GregorianCalendar(
                         pref.getInteger("bookReaderDateYear" + i),
                         pref.getInteger("bookReaderDateMount" + i),
                         pref.getInteger("bookReaderDateDay" + i)
@@ -103,13 +109,15 @@ Boolean save=true;
 
             }
 
-
+        }else {
+                startLogo++;
+            }
         }
         screen.allBookListFullUpdate();
         Screen.genreSearch.setItems(" Неопределенный жанр", " Учебники[" + Screen.genre1 + "]", " Классика[" + Screen.genre2 + "]", " Детская литература[" + Screen.genre3 + "]", " Справочная литература[" + Screen.genre4 + "]", " Зарубежная литература[" + Screen.genre5 + "]");
 
         Screen.bookOnHendNumberInt = pref.getInteger("bookOnHendNumberInt");
-        Screen.numberOfBook = pref.getInteger("bookNumber");
+
         Screen.bookNumberOfHend = pref.getInteger("bookNumberOfHend");
 Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
 
@@ -127,10 +135,11 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
                 int readerSize = Screen.readersArrayList.size();
                 for (int i = 0; i < readerSize; i++) {
                     if (Screen.readersArrayList.get(i).yearsLern == 12) {
+                        Screen.logNewString((new GregorianCalendar()).getTime() + " читатель выпустился из 11 класса " + Screen.readersArrayList.get(i).surname + " " + Screen.readersArrayList.get(i).name );
                         Screen.readersArrayList.remove(i);
                         readerSize--;
                         i--;
-                    }
+                       }
 
 
                 }
@@ -172,7 +181,7 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
 
 
             prefBackup.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
-            prefBackup.putInteger("bookNumber", Screen.numberOfBook);
+            prefBackup.putInteger("bookNumber", Screen.bookArrayList.size());
             prefBackup.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
 
             prefBackup.putInteger("dataOfNewClassDay", screen.dataOfNewClass.getTime().getDate());
@@ -184,11 +193,10 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
 
 
         }
-        Screen.numberOfBook = Screen.bookArrayList.size();
-        Screen.numberAllBook.setText(" " + Screen.numberOfBook);
+        Screen.numberAllBook.setText(" " + Screen.bookArrayList.size());
         Screen.readerNumber.setText(" " + Screen.readersArrayList.size());
         Screen.readerNumber.setText(" " + Screen.readersArrayList.size());
-        Screen.bookOnLibrary.setText(" " + (Screen.numberOfBook - Screen.bookOnHendNumberInt));
+        Screen.bookOnLibrary.setText(" " + (Screen.bookArrayList.size() - Screen.bookOnHendNumberInt));
         pref = Gdx.app.getPreferences("LibrarySave");
         screen.getAuthorForSearch();
         screen.authorSearch.setItems(screen.authorForSerch);
@@ -212,10 +220,17 @@ Screen.bookOnHendNumber.setText(" "+(Screen.bookOnHendNumberInt));
         catch(IOException ex){
             System.out.println(ex.getMessage());
         }
-   }
+        startLogo = 1000;
+
+    }
 
     @Override
     public void render() {
+     //   try {
+// TODO: 17.02.2022 вкл отловливатель
+
+
+
         if (timerResize > 0) {
             timerResize--;
         }
@@ -263,7 +278,19 @@ if (save){
         if (startLogo > 1108) {
             Screen.render();
         }
-
+//        }catch (Exception e){
+//            try(FileWriter writer = new FileWriter((Gdx.files.external("/.prefs/Library/crash"+(new GregorianCalendar()).getTime().toString().split(":")+".txt")).file().getAbsolutePath(), false))
+//            {
+//
+//                writer.write(e.toString());
+//
+//                writer.flush();
+//            }
+//            catch(IOException ex){
+//
+//                System.out.println(ex.getMessage());
+//            }
+//        }
     }
 
     @Override
@@ -311,17 +338,23 @@ if (save){
     }
 
     public static void saveNewBook(String nameBook, String author, String descriptionString, String genre, String coverBook) {
+        if (!saveGo){
+            saveGo=true;
+
         pref.putString("bookName" + Screen.bookArrayList.size(), nameBook);
         pref.putString("bookAuthor" + Screen.bookArrayList.size(), author);
         pref.putString("bookDescription" + Screen.bookArrayList.size(), descriptionString);
         pref.putString("bookGenre" + Screen.bookArrayList.size(), genre);
         pref.putBoolean("bookGiven" + Screen.bookArrayList.size(), false);
         pref.putString("bookCover" + Screen.bookArrayList.size(), coverBook);
-        pref.putInteger("bookNumber", Screen.numberOfBook);
+        pref.putInteger("bookNumber", Screen.bookArrayList.size());
         pref.flush();
-    }
+            saveGo=false;
+    }}
 
     public static void saveNewReader(String name, String surname, String patronymic, int yearsLern, String charClass) {
+        if (!saveGo){
+            saveGo=true;
         pref.putInteger("readerLength", Screen.readersArrayList.size());
 
         pref.putString("name" + Screen.readersArrayList.size(), name);
@@ -330,11 +363,13 @@ if (save){
         pref.putInteger("yearsLern" + Screen.readersArrayList.size(), yearsLern);
         pref.putString("charClass" + Screen.readersArrayList.size(), charClass);
         pref.flush();
-    }
+            saveGo=false;
+    }}
 
     public static void saveBookGiver(int i, int WeekYear, int getMonth
             , int Date, String name, String surname, String patronymic, int yearsLern, String charClass) {
-
+        if (!saveGo){
+            saveGo=true;
         pref.putBoolean("bookGiven" + i, true);
 
         pref.putInteger("bookReaderDateYear" + i, WeekYear);
@@ -349,101 +384,28 @@ if (save){
         pref.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
         pref.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
         pref.flush();
-    }
+            saveGo=false;
+    }}
 
     public static void saveBookReturn(int index) {
+        if (!saveGo){
+            saveGo=true;
         pref.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
         pref.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
         pref.putBoolean("bookGiven" + index, false);
         pref.flush();
-    }
+            saveGo=false;
+    }}
 
-    public static void saveAll() {
-        for (int i = 0; i < Screen.bookArrayList.size(); i++) {
-            pref.putString("bookName" + i, Screen.bookArrayList.get(i).name);
-            pref.putString("bookAuthor" + i, Screen.bookArrayList.get(i).author);
-            pref.putString("bookDescription" + i, Screen.bookArrayList.get(i).description);
-            pref.putString("bookGenre" + i, Screen.bookArrayList.get(i).genre);
-            pref.putBoolean("bookGiven" + i, (Screen.bookArrayList.get(i).reader != null));
-            pref.putString("bookCover" + i, (Screen.bookArrayList.get(i).coverBook));
-            if (Screen.bookArrayList.get(i).reader != null) {
-                pref.putInteger("bookReaderDateYear" + i, Screen.bookArrayList.get(i).dataOfGiven.getWeekYear());
-                pref.putInteger("bookReaderDateMount" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getMonth());
-                pref.putInteger("bookReaderDateDay" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getDate());
+    public static void saveAll()
+    {
+//        if (!saveGo){
 
-                pref.putString("bookReaderName" + i, Screen.bookArrayList.get(i).reader.name);
-                pref.putString("bookReaderSurname" + i, Screen.bookArrayList.get(i).reader.surname);
-                pref.putString("bookReaderPatronymic" + i, Screen.bookArrayList.get(i).reader.patronymic);
-                pref.putInteger("bookReaderYearsLern" + i, Screen.bookArrayList.get(i).reader.yearsLern);
-                pref.putString("bookReaderCharClass" + i, Screen.bookArrayList.get(i).reader.charClass);
-
-            }
-
-
-        }
-        pref.putInteger("readerLength", Screen.readersArrayList.size());
-        for (int i = 0; i < Screen.readersArrayList.size(); i++) {
-            pref.putString("name" + i, Screen.readersArrayList.get(i).name);
-            pref.putString("surname" + i, Screen.readersArrayList.get(i).surname);
-            pref.putString("patronymic" + i, Screen.readersArrayList.get(i).patronymic);
-            pref.putInteger("yearsLern" + i, Screen.readersArrayList.get(i).yearsLern);
-            pref.putString("charClass" + i, Screen.readersArrayList.get(i).charClass);
-        }
-
-
-        pref.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
-        pref.putInteger("bookNumber", Screen.numberOfBook);
-        pref.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
-
-
-        pref.putInteger("dataOfNewClassDay", screen.dataOfNewClass.getTime().getDate());
-        pref.putInteger("dataOfNewClassMount", screen.dataOfNewClass.getTime().getMonth());
-        pref.putInteger("dataOfNewClassYear", screen.dataOfNewClass.getWeekYear());
-
-
-        pref.flush();
-
-
-
-
-        for (int i = 0; i < Screen.bookArrayList.size(); i++) {
-            prefBackup.putString("bookName" + i, Screen.bookArrayList.get(i).name);
-            prefBackup.putString("bookAuthor" + i, Screen.bookArrayList.get(i).author);
-            prefBackup.putString("bookDescription" + i, Screen.bookArrayList.get(i).description);
-            prefBackup.putString("bookGenre" + i, Screen.bookArrayList.get(i).genre);
-            prefBackup.putBoolean("bookGiven" + i, (Screen.bookArrayList.get(i).reader != null));
-            prefBackup.putString("bookCover" + i, (Screen.bookArrayList.get(i).coverBook));
-            if (Screen.bookArrayList.get(i).reader != null) {
-                prefBackup.putInteger("bookReaderDateYear" + i, Screen.bookArrayList.get(i).dataOfGiven.getWeekYear());
-                prefBackup.putInteger("bookReaderDateMount" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getMonth());
-                prefBackup.putInteger("bookReaderDateDay" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getDate());
-
-                prefBackup.putString("bookReaderName" + i, Screen.bookArrayList.get(i).reader.name);
-                prefBackup.putString("bookReaderSurname" + i, Screen.bookArrayList.get(i).reader.surname);
-                prefBackup.putString("bookReaderPatronymic" + i, Screen.bookArrayList.get(i).reader.patronymic);
-                prefBackup.putInteger("bookReaderYearsLern" + i, Screen.bookArrayList.get(i).reader.yearsLern);
-                prefBackup.putString("bookReaderCharClass" + i, Screen.bookArrayList.get(i).reader.charClass);
-            }
-        }
-        prefBackup.putInteger("readerLength", Screen.readersArrayList.size());
-        for (int i = 0; i < Screen.readersArrayList.size(); i++) {
-            prefBackup.putString("name" + i, Screen.readersArrayList.get(i).name);
-            prefBackup.putString("surname" + i, Screen.readersArrayList.get(i).surname);
-            prefBackup.putString("patronymic" + i, Screen.readersArrayList.get(i).patronymic);
-            prefBackup.putInteger("yearsLern" + i, Screen.readersArrayList.get(i).yearsLern);
-            prefBackup.putString("charClass" + i, Screen.readersArrayList.get(i).charClass);
-        }
-        prefBackup.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
-        prefBackup.putInteger("bookNumber", Screen.numberOfBook);
-        prefBackup.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
-        prefBackup.putInteger("dataOfNewClassDay", screen.dataOfNewClass.getTime().getDate());
-        prefBackup.putInteger("dataOfNewClassMount", screen.dataOfNewClass.getTime().getMonth());
-        prefBackup.putInteger("dataOfNewClassYear", screen.dataOfNewClass.getWeekYear());
-        prefBackup.flush();
-
-
-
-
+        if (!Library.saveGo){
+            Library.saveGo=true;
+        mThing = new Save();
+         myThready = new Thread(mThing);
+        myThready.start();}
 
     }
 
@@ -452,62 +414,74 @@ if (save){
 
     @Override
     public void dispose() {
+        if (!saveGo) {
+            saveGo = true;
+
+            for (int i = 0; i < Screen.bookArrayList.size(); i++) {
+                Library.pref.putString("bookName" + i, Screen.bookArrayList.get(i).name);
+                Library.pref.putString("bookAuthor" + i, Screen.bookArrayList.get(i).author);
+                Library.pref.putString("bookDescription" + i, Screen.bookArrayList.get(i).description);
+                Library.pref.putString("bookGenre" + i, Screen.bookArrayList.get(i).genre);
+                Library.pref.putBoolean("bookGiven" + i, (Screen.bookArrayList.get(i).reader != null));
+                Library.pref.putString("bookCover" + i, (Screen.bookArrayList.get(i).coverBook));
+                if (Screen.bookArrayList.get(i).reader != null) {
+                    Library.pref.putInteger("bookReaderDateYear" + i, Screen.bookArrayList.get(i).dataOfGiven.getWeekYear());
+                    Library.pref.putInteger("bookReaderDateMount" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getMonth());
+                    Library.pref.putInteger("bookReaderDateDay" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getDate());
+
+                    Library.pref.putString("bookReaderName" + i, Screen.bookArrayList.get(i).reader.name);
+                    Library.pref.putString("bookReaderSurname" + i, Screen.bookArrayList.get(i).reader.surname);
+                    Library.pref.putString("bookReaderPatronymic" + i, Screen.bookArrayList.get(i).reader.patronymic);
+                    Library.pref.putInteger("bookReaderYearsLern" + i, Screen.bookArrayList.get(i).reader.yearsLern);
+                    Library.pref.putString("bookReaderCharClass" + i, Screen.bookArrayList.get(i).reader.charClass);
+
+                }
 
 
-        for (int i = 0; i < Screen.bookArrayList.size(); i++) {
-            pref.putString("bookName" + i, Screen.bookArrayList.get(i).name);
-            pref.putString("bookAuthor" + i, Screen.bookArrayList.get(i).author);
-            pref.putString("bookDescription" + i, Screen.bookArrayList.get(i).description);
-            pref.putString("bookGenre" + i, Screen.bookArrayList.get(i).genre);
-            pref.putBoolean("bookGiven" + i, (Screen.bookArrayList.get(i).reader != null));
-            pref.putString("bookCover" + i, (Screen.bookArrayList.get(i).coverBook));
-            if (Screen.bookArrayList.get(i).reader != null) {
-                pref.putInteger("bookReaderDateYear" + i, Screen.bookArrayList.get(i).dataOfGiven.getWeekYear());
-                pref.putInteger("bookReaderDateMount" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getMonth());
-                pref.putInteger("bookReaderDateDay" + i, Screen.bookArrayList.get(i).dataOfGiven.getTime().getDate());
-
-                pref.putString("bookReaderName" + i, Screen.bookArrayList.get(i).reader.name);
-                pref.putString("bookReaderSurname" + i, Screen.bookArrayList.get(i).reader.surname);
-                pref.putString("bookReaderPatronymic" + i, Screen.bookArrayList.get(i).reader.patronymic);
-                pref.putInteger("bookReaderYearsLern" + i, Screen.bookArrayList.get(i).reader.yearsLern);
-                pref.putString("bookReaderCharClass" + i, Screen.bookArrayList.get(i).reader.charClass);
-
+            }
+            Library.pref.putInteger("readerLength", Screen.readersArrayList.size());
+            for (int i = 0; i < Screen.readersArrayList.size(); i++) {
+                Library.pref.putString("name" + i, Screen.readersArrayList.get(i).name);
+                Library.pref.putString("surname" + i, Screen.readersArrayList.get(i).surname);
+                Library.pref.putString("patronymic" + i, Screen.readersArrayList.get(i).patronymic);
+                Library.pref.putInteger("yearsLern" + i, Screen.readersArrayList.get(i).yearsLern);
+                Library.pref.putString("charClass" + i, Screen.readersArrayList.get(i).charClass);
             }
 
 
+            Library.pref.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
+            Library.pref.putInteger("bookNumber", Screen.bookArrayList.size());
+            Library.pref.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
+
+
+            Library.pref.putInteger("dataOfNewClassDay", Screen.dataOfNewClass.getTime().getDate());
+            Library.pref.putInteger("dataOfNewClassMount", Screen.dataOfNewClass.getTime().getMonth());
+            Library.pref.putInteger("dataOfNewClassYear", Screen.dataOfNewClass.getWeekYear());
+
+
+            Library.pref.flush();
+
+
+            batch.dispose();
+            Screen.stage.dispose();
+            Screen.imageWindow.dispose();
+            Screen.skinTree.dispose();
+            Screen.skinTree.dispose();
+
+
+            background.dispose();
+
+
+                saveGo=false;
+        }else {
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            dispose();
+            // TODO: 16.02.2022 не уверен, что это коректно
         }
-        pref.putInteger("readerLength", Screen.readersArrayList.size());
-        for (int i = 0; i < Screen.readersArrayList.size(); i++) {
-            pref.putString("name" + i, Screen.readersArrayList.get(i).name);
-            pref.putString("surname" + i, Screen.readersArrayList.get(i).surname);
-            pref.putString("patronymic" + i, Screen.readersArrayList.get(i).patronymic);
-            pref.putInteger("yearsLern" + i, Screen.readersArrayList.get(i).yearsLern);
-            pref.putString("charClass" + i, Screen.readersArrayList.get(i).charClass);
-        }
-
-
-        pref.putInteger("bookOnHendNumberInt", Screen.bookOnHendNumberInt);
-        pref.putInteger("bookNumber", Screen.numberOfBook);
-        pref.putInteger("bookNumberOfHend", Screen.bookNumberOfHend);
-
-
-        pref.putInteger("dataOfNewClassDay", screen.dataOfNewClass.getTime().getDate());
-        pref.putInteger("dataOfNewClassMount", screen.dataOfNewClass.getTime().getMonth());
-        pref.putInteger("dataOfNewClassYear", screen.dataOfNewClass.getWeekYear());
-
-
-        pref.flush();
-        batch.dispose();
-        Screen.stage.dispose();
-        Screen.imageWindow.dispose();
-        Screen.skinTree.dispose();
-        Screen.skinTree.dispose();
-
-
-        background.dispose();
-
 
     }
-
-
 }
