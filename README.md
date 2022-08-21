@@ -49,7 +49,7 @@ ___
 
 
 * так выглядит кнопка ![image](https://user-images.githubusercontent.com/71974672/185788714-5135a09e-7411-430c-b66e-25141ab6b59f.png)
-* так тексстовое поле ![image](https://user-images.githubusercontent.com/71974672/185788761-d08dd36c-18ec-40ee-a63e-c7f7504de46c.png)
+* так текстовое поле ![image](https://user-images.githubusercontent.com/71974672/185788761-d08dd36c-18ec-40ee-a63e-c7f7504de46c.png)
 * а кнопка с стрелочкой вниз это выпадающий список ![image](https://user-images.githubusercontent.com/71974672/185788776-5fdcabbd-bb15-4767-b1bc-9d7e7c28b907.png)
 при его нажатии выйдут варианты ![image](https://user-images.githubusercontent.com/71974672/185788791-d0daadd8-b1c3-4e86-a2a3-b6d387abd419.png)
 
@@ -64,7 +64,7 @@ ___
  
  ![image](https://user-images.githubusercontent.com/71974672/185788147-08bac2ef-3e65-4ac6-a5df-2054534908b3.png)![image](https://user-images.githubusercontent.com/71974672/185788153-4cf1d1f3-936c-491b-9e51-6c5002c7b0e7.png)
 
-заполняем все поля и добовляем
+заполняем все поля и добавляем
 
 не забываем сохранять все ![image](https://user-images.githubusercontent.com/71974672/185788220-d326ed19-f9ca-41e9-8374-dc3dd42e19c9.png)
 кнопка сверху справа
@@ -73,7 +73,7 @@ ___
 
 выбирая нужных читателей и книги возвращаем и выдаем книги
 
-теперь можно смотреть кто взял книги, кто долго не возвращает, сколько определенных книг вналичии, и т д 
+теперь можно смотреть кто взял книги, кто долго не возвращает, сколько определенных книг в наличии, и т.д. 
  нажимая на книгу в меню с информацией можно посмотреть кто ее читает ![image](https://user-images.githubusercontent.com/71974672/185789020-d280dc52-41e0-4613-9f60-13ee3dc27c21.png)
 
 а в списке читателей можно посмотреть какие книги читает этот читатель
